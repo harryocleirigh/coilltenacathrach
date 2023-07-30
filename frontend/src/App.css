@@ -1,0 +1,58 @@
+.navbar  {
+  position: absolute;
+  top: 24px;
+  left: 48px;
+  right: 48px;
+  height: 48px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+}
+
+.transparent-button  {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.navbar-links  {
+  margin: 50px;
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  font-size: large;
+  transition: background-color 0.7s ease;
+}
+
+.navbar-links button  {
+  font-size: 15px;
+  color: white;
+  text-decoration: none;
+  transition: color 0.7s ease;
+}
+
+.navbar-links button:hover  {
+  color: rgb(16, 16, 74);
+}
+
+.navbar-links-wrapper  {
+  margin:40px;
+  padding:10px;
+}
+
+.navbar-links:hover  {
+  background-color: rgb(215, 215, 220);
+
+}
+.navbar img  {
+  max-height: 72px;
+  max-width: 150px;
+}
+
+.navbar-logo  {
+  margin-top: 6rem;
+  width: 72px;
+}
