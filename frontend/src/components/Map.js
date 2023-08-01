@@ -12,6 +12,9 @@ function Map() {
 
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
     const BASE_API_URL = 'http://127.0.0.1:5000'
+    const STYLE = 'mapbox://styles/harryocleirigh/clkp8dbvm00ls01phf9bl7of1';   
+    const LIGHT_TREE_THEME = '#C1E1C1'
+    const DARK_TREE_THEME = '#326932'
     const mapContainer = useRef(null);
     const map = useRef(null);
     
@@ -54,7 +57,7 @@ function Map() {
             'source-layer': 'building',
             'filter': ['==', 'extrude', 'true'],
             'type': 'fill-extrusion',
-            'minzoom': 15,
+            'minzoom': 12,
             'paint': {
             'fill-extrusion-color': '#aaa',
             'fill-extrusion-height': [
@@ -102,7 +105,7 @@ function Map() {
                     data: neighbourhood
                     },
                     paint: {
-                    'fill-color': '#C1E1C1', // fill color
+                    'fill-color': '#326932', // fill color
                     'fill-opacity-transition': { duration: 600 }, // .6 second transition
                     'fill-opacity': [
                         'case',
@@ -127,7 +130,7 @@ function Map() {
                     data: neighbourhood
                     },
                     paint: {  
-                    'line-color': '#C1E1C1',
+                    'line-color': '#326932',
                     'line-width': 1,
                     'line-width-transition': { duration: 600 }, // .6 second transition
                     }
@@ -151,12 +154,12 @@ function Map() {
 
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: 'mapbox://styles/harryocleirigh/clkp8dbvm00ls01phf9bl7of1',
+                style: 'mapbox://styles/mapbox/dark-v11',
                 center: [-6.278533590277888, 53.31333318416409],
                 zoom: 10,
                 pitch: 0,
-                // maxZoom: 15,
-                // minZoom: 11
+                maxZoom: 15,
+                minZoom: 11
             });
 
             map.current.on('load', () => {
@@ -264,14 +267,14 @@ function Map() {
                 'type': 'circle',
                 'source': id,
                 'paint': {
-                    'circle-color': '#C1E1C1',
+                    'circle-color': '#326932',
                     'circle-opacity': 1,
                     'circle-radius': [
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        14, 1.5,  // At zoom level 14 or less, radius is 2
-                        14.01, 3 // At zoom level 14.01 or more, radius is 4
+                        15, 1.5,  // At zoom level 14 or less, radius is 2
+                        15.01, 3 // At zoom level 14.01 or more, radius is 4
                     ],
                 }
             }, 'settlement-subdivision-label');
