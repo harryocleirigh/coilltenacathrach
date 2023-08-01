@@ -93,16 +93,7 @@ function Map() {
                 fetchTrees(`${BASE_API_URL}/trees/7`, setTreesSeven, 7);
                 fetchTrees(`${BASE_API_URL}/trees/8`, setTreesEight, 8);
                 fetchTrees(`${BASE_API_URL}/trees/9`, setTreesNine, 9);
-            });
-
-            map.current.on('click', 'treesOne', function (e) {
-                // Replace 14 with your desired zoom threshold
-                if (map.current.getZoom() > 14) {
-                    new mapboxgl.Popup()
-                        .setLngLat(e.lngLat)
-                        .setHTML('<h1>Tree Information</h1><p>Some info about this tree...</p>')
-                        .addTo(map.current);
-                }
+                handleMouseOver();
             });
         };
     }, []);
@@ -201,7 +192,47 @@ function Map() {
     }, [treesOne, treesTwo, treesThree, treesFour, treesFive, treesSix, treesSeven, treesEight, treesNine, map.current]);
     
     
+    const handleMouseOver = () => {
+
+        let popup; // Create a variable to hold the current popup
+
+        map.current.on('mousemove', (e) => {
+
+            // Query the features under the mouse pointer
+            const features = map.current.queryRenderedFeatures(e.point, { layers: ['treesOne', 'treesTwo', 'treesThree', 'treesFour', 'treesFive', 'treesSix', 'treesSeven', 'treesEight', 'treesNine'] });
+          
+            if (features.length > 0) {
+                
+                const tree = features[0];
     
+                // Remove the previous popup if it exists
+                if (popup) {
+                    popup.remove();
+                }
+
+                // Create a new popup and assign it to the popup variable
+                popup = new mapboxgl.Popup({ offset: 25 })
+                    .setLngLat(tree.geometry.coordinates)
+                    .setHTML(`<h3>${tree.properties.Species_La}</h3>`)
+                    .addTo(map.current);
+            } else if (popup) {
+                popup.remove();
+                popup = null;
+            }
+        });
+
+        map.current.on('mouseleave', (e) => {
+
+            if (popup && e.features.length) {
+                popup.remove();
+                popup = null;
+            }
+
+            else {
+                popup.remove();
+            }
+        });
+    }
 
     return  (
         <div>
