@@ -70,6 +70,7 @@ def getTreesPart(part_number):
 @app.route('/singletree/<int:id>', methods=['GET'])
 def getSingleTree(id):
     if id in all_trees:
+        # if id in all_trees and all_trees[id]['Species_Co'] != None:
         # Flask's jsonify function can be used to convert json compatible data to a response object.
         return jsonify(all_trees[id]), 200
     else:
