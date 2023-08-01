@@ -14,9 +14,12 @@ function Map() {
     const BASE_API_URL = 'http://127.0.0.1:5000'
     const mapContainer = useRef(null);
     const map = useRef(null);
-
-    // comment
     
+    // global layers:
+    const [treeLayers, setTreeLayers] = useState(['treesOne', 'treesTwo', 'treesThree', 'treesFour', 'treesFive', 'treesSix', 'treesSeven', 'treesEight', 'treesNine'])
+    const [postcodeLayers, setPostcodeLayers] = useState([]);
+    const [postcodeLineLayers, setPostcodeLineLayers] = useState([]);
+
     // Use States
     const [trees, setTrees] = useState([]);
     const [singleTreeData, setSingleTreeData] = useState(null);
@@ -78,29 +81,19 @@ function Map() {
     };
 
     const addPostcodes = (map, neighbourhoods) => {
+    
+        // Temp arrays to hold layers
+        let tempPostcodeLayers = [];
+        let tempPostcodeLineLayers = [];
 
         // loop over the neighborhoods and create a new layer for each
         neighbourhoods.features.forEach((neighbourhood) => {
 
-            // construct the layer ID
-            const layerId = `${neighbourhood.properties.postcodes}`;
+            const layerId = neighbourhood.properties.postcodes;
+            const lineLayerId = `${layerId}-line`;
 
-            console.log(layerId)
-
-            // add new properties to our neighbourhood objects so that we can reuse them later (on hover effect)
-            neighbourhood.id = layerId;
-
-            // add new line id to our neighbourhood objects so that we can reuse them later (on hover effect)
-            const lineLayerId = layerId + '-line';
-
-            // add two distinct layer types:
-            // 1. Fill layer -> we will use this to colour in our boundaries
-            // 2. Line layer -> we will use this layer to highlight the borders of our boundaries on hover
-            
             if (!map.getLayer(layerId)) {
-
-                console.log(`Adding layer: ${neighbourhood.properties.postcodes}`);
-
+                
                 map.addLayer({
                     id: neighbourhood.properties.postcodes,
                     type: 'fill',
@@ -109,24 +102,22 @@ function Map() {
                     data: neighbourhood
                     },
                     paint: {
-                    'fill-color': '#888', // fill color
+                    'fill-color': '#C1E1C1', // fill color
                     'fill-opacity-transition': { duration: 600 }, // .6 second transition
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
                         0.6,
-                        0.1
+                        0.3
                     ],
                     }
                 });
 
-                console.log(`Layer ${neighbourhood.properties.postcodes} added successfully.`);
+                tempPostcodeLayers.push(layerId);
 
             }
 
             if (!map.getLayer(lineLayerId)) {
-
-                console.log(`Adding line layer: ${neighbourhood.properties.postcodes+'-line'}`);
 
                 map.addLayer({
                     id: neighbourhood.properties.postcodes+'-line',
@@ -136,16 +127,20 @@ function Map() {
                     data: neighbourhood
                     },
                     paint: {  
-                    'line-color': '#000000',
+                    'line-color': '#C1E1C1',
                     'line-width': 1,
                     'line-width-transition': { duration: 600 }, // .6 second transition
                     }
                 });
 
-                console.log(`Line layer ${neighbourhood.properties.postcodes+'-line'} added successfully.`);
+                tempPostcodeLineLayers.push(lineLayerId);
 
             }  
         });
+
+        setPostcodeLayers(prevLayers => [...prevLayers, ...tempPostcodeLayers]);
+        setPostcodeLineLayers(prevLayers => [...prevLayers, ...tempPostcodeLineLayers]);
+    
     }
 
     // Init map
@@ -319,6 +314,7 @@ function Map() {
 
     }, [treesOne, treesTwo, treesThree, treesFour, treesFive, treesSix, treesSeven, treesEight, treesNine, map.current]);
 
+    // Utilities
     const handleMouseOver = () => {
         map.current.on('mousemove', (e) => {
 
@@ -344,10 +340,23 @@ function Map() {
         });
     }
 
+    const setLayerVisibility = (layerIds, isVisible) => {
+        layerIds.forEach(layerId => {
+            if (map.current.getLayer(layerId)) {
+                map.current.setLayoutProperty(layerId, 'visibility', isVisible ? 'visible' : 'none');
+            }
+        });
+    }
+
     return  (
         <div>
             <div ref={mapContainer} style={{ width: '100%', height: '100vh' }} />
-            <Navbar />
+            <Navbar 
+                treeLayers={treeLayers}
+                postcodeLayers={postcodeLayers}
+                postcodeLineLayers={postcodeLineLayers}
+                setLayerVisibility={setLayerVisibility}
+            />
         </div>
     )
 }
