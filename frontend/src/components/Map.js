@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import Navbar from './Navbar';
 
 // data
-import neighbourhoods from '../data/neighbourhood.geojson'
+import neighbourhoods from '../data/revisedneighbourhood.geojson'
 
 function Map() {
 
@@ -114,8 +114,8 @@ function Map() {
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.9,
-                        0.6
+                        0.6,
+                        0.1
                     ],
                     }
                 });
