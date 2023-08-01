@@ -5,6 +5,8 @@ import Navbar from './Navbar';
 
 function Map() {
 
+    let popup; // Create a variable to hold the current popup
+
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
     const BASE_API_URL = 'http://127.0.0.1:5000'
     const mapContainer = useRef(null);
@@ -14,6 +16,7 @@ function Map() {
     
     // Use States
     const [trees, setTrees] = useState([]);
+    const [singleTreeData, setSingleTreeData] = useState(null);
 
     // chunks of data
     const [treesOne, setTreesOne] = useState(null);
@@ -122,6 +125,30 @@ function Map() {
         }
     };
 
+    const fetchSingleTree = async (ID, tree) => {
+        try {
+            const response = await fetch(`${BASE_API_URL}/singletree/${ID}`);
+            if (!response.ok) {
+                throw new Error('There has been an error getting the tree data');
+            }
+            const data = await response.json();
+            setSingleTreeData(data);
+
+            if (popup) {
+                popup.remove();
+            }
+    
+            // Create the popup after data has been fetched and set
+            popup = new mapboxgl.Popup({ offset: 25 })
+                .setLngLat(tree.geometry.coordinates)
+                .setHTML(`<h3>${data.Species_Co}</h3>`) // Use `data.id` because `data` is the response from the fetch
+                .addTo(map.current);
+            
+        } catch (error) {
+            console.error('Error fetching data for a single tree', error);
+        }   
+    }
+
     useEffect(() => {
         
         const addSourceAndLayer = (id, data) => {
@@ -190,46 +217,33 @@ function Map() {
         };    
 
     }, [treesOne, treesTwo, treesThree, treesFour, treesFive, treesSix, treesSeven, treesEight, treesNine, map.current]);
-    
+
+
+    useEffect(() => {
+        console.log(singleTreeData);
+    }, [singleTreeData])
     
     const handleMouseOver = () => {
-
-        let popup; // Create a variable to hold the current popup
-
         map.current.on('mousemove', (e) => {
 
             // Query the features under the mouse pointer
             const features = map.current.queryRenderedFeatures(e.point, { layers: ['treesOne', 'treesTwo', 'treesThree', 'treesFour', 'treesFive', 'treesSix', 'treesSeven', 'treesEight', 'treesNine'] });
-          
+            
             if (features.length > 0) {
-                
+
+                map.current.getCanvas().style.cursor = 'pointer';
+
                 const tree = features[0];
-    
-                // Remove the previous popup if it exists
-                if (popup) {
-                    popup.remove();
-                }
-
-                // Create a new popup and assign it to the popup variable
-                popup = new mapboxgl.Popup({ offset: 25 })
-                    .setLngLat(tree.geometry.coordinates)
-                    .setHTML(`<h3>${tree.properties.Species_La}</h3>`)
-                    .addTo(map.current);
-            } else if (popup) {
-                popup.remove();
-                popup = null;
-            }
+                const singleTree = tree.properties.id;
+                fetchSingleTree(singleTree, tree);
+            } 
         });
+    
+        map.current.on('mouseleave', () => {
 
-        map.current.on('mouseleave', (e) => {
-
-            if (popup && e.features.length) {
+            if (popup) {
                 popup.remove();
                 popup = null;
-            }
-
-            else {
-                popup.remove();
             }
         });
     }
