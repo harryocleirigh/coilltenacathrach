@@ -3,6 +3,9 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Navbar from './Navbar';
 
+// data
+import neighbourhoods from '../data/neighbourhood.geojson'
+
 function Map() {
 
     let popup; // Create a variable to hold the current popup
@@ -29,10 +32,16 @@ function Map() {
     const [treesEight, setTreesEight] = useState(null);
     const [treesNine, setTreesNine] = useState(null);
 
+    // postcodes in double
+    const [postcodes, setPostcodes] = useState(null);
+
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const retryCount = useRef(0);
+
+    // fetch data locally - create react app treats imports as static assets and will therefore look to point to a url:
+    // on mount fetch this data
 
     const add3DBuildings = (map) => {
 
@@ -68,23 +77,93 @@ function Map() {
         });
     };
 
-    useEffect(() => {
+    const addPostcodes = (map, neighbourhoods) => {
 
+        // loop over the neighborhoods and create a new layer for each
+        neighbourhoods.features.forEach((neighbourhood) => {
+
+            // construct the layer ID
+            const layerId = `${neighbourhood.properties.postcodes}`;
+
+            console.log(layerId)
+
+            // add new properties to our neighbourhood objects so that we can reuse them later (on hover effect)
+            neighbourhood.id = layerId;
+
+            // add new line id to our neighbourhood objects so that we can reuse them later (on hover effect)
+            const lineLayerId = layerId + '-line';
+
+            // add two distinct layer types:
+            // 1. Fill layer -> we will use this to colour in our boundaries
+            // 2. Line layer -> we will use this layer to highlight the borders of our boundaries on hover
+            
+            if (!map.getLayer(layerId)) {
+
+                console.log(`Adding layer: ${neighbourhood.properties.postcodes}`);
+
+                map.addLayer({
+                    id: neighbourhood.properties.postcodes,
+                    type: 'fill',
+                    source: {
+                    type: 'geojson',
+                    data: neighbourhood
+                    },
+                    paint: {
+                    'fill-color': '#888', // fill color
+                    'fill-opacity-transition': { duration: 600 }, // .6 second transition
+                    'fill-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        0.9,
+                        0.6
+                    ],
+                    }
+                });
+
+                console.log(`Layer ${neighbourhood.properties.postcodes} added successfully.`);
+
+            }
+
+            if (!map.getLayer(lineLayerId)) {
+
+                console.log(`Adding line layer: ${neighbourhood.properties.postcodes+'-line'}`);
+
+                map.addLayer({
+                    id: neighbourhood.properties.postcodes+'-line',
+                    type: 'line',
+                    source: {
+                    type: 'geojson',
+                    data: neighbourhood
+                    },
+                    paint: {  
+                    'line-color': '#000000',
+                    'line-width': 1,
+                    'line-width-transition': { duration: 600 }, // .6 second transition
+                    }
+                });
+
+                console.log(`Line layer ${neighbourhood.properties.postcodes+'-line'} added successfully.`);
+
+            }  
+        });
+    }
+
+    // Init map
+    useEffect(() => {
         if (!map.current) {
-    
             // swap out access token
             mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
-    
+
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
                 style: 'mapbox://styles/harryocleirigh/clkp8dbvm00ls01phf9bl7of1',
                 center: [-6.278533590277888, 53.31333318416409],
                 zoom: 10,
                 pitch: 0,
-                maxZoom: 15,
-                minZoom: 11
+                // maxZoom: 15,
+                // minZoom: 11
             });
-          
+
             map.current.on('load', () => {
                 add3DBuildings(map.current);
                 fetchTrees(`${BASE_API_URL}/trees/1`, setTreesOne, 1);
@@ -98,8 +177,31 @@ function Map() {
                 fetchTrees(`${BASE_API_URL}/trees/9`, setTreesNine, 9);
                 handleMouseOver();
             });
-        };
-    }, []);
+        }
+    }, []); // Empty dependency array so this only runs once
+
+    // Fetch neighbourhoods
+    useEffect(() => {
+        fetch(neighbourhoods)
+        .then(response => response.json())
+        .then(data => {
+            setPostcodes(data);
+        })
+        .catch(error => console.error(error));
+    }, []); // Empty dependency array so this only runs once
+
+    // Add postcodes to map when they're fetched
+    useEffect(() => {
+        if (map.current && postcodes) {
+            addPostcodes(map.current, postcodes);
+        }
+    }, [postcodes]); // Runs whenever postcodes state changes
+
+    // Add postcodes to map when they're fetched
+    useEffect(() => {
+        console.log(postcodes)
+    }, [postcodes]); // Runs whenever postcodes state changes
+
 
     const fetchTrees = async (url, setTreeData, treeNumber) => {
         try {
@@ -109,7 +211,6 @@ function Map() {
                 throw new Error(message);
             }
             const data = await response.json();
-            console.log(data);
             setTreeData(data);
         } 
         catch (err) {
@@ -141,7 +242,7 @@ function Map() {
             // Create the popup after data has been fetched and set
             popup = new mapboxgl.Popup({ offset: 25 })
                 .setLngLat(tree.geometry.coordinates)
-                .setHTML(`<h3>${data.Species_Co}</h3>`) // Use `data.id` because `data` is the response from the fetch
+                .setHTML(`<p>${data.Species_Co}</p>`) // Use `data.id` because `data` is the response from the fetch
                 .addTo(map.current);
             
         } catch (error) {
@@ -218,11 +319,6 @@ function Map() {
 
     }, [treesOne, treesTwo, treesThree, treesFour, treesFive, treesSix, treesSeven, treesEight, treesNine, map.current]);
 
-
-    useEffect(() => {
-        console.log(singleTreeData);
-    }, [singleTreeData])
-    
     const handleMouseOver = () => {
         map.current.on('mousemove', (e) => {
 
