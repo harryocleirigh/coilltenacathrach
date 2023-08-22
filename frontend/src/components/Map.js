@@ -19,24 +19,29 @@ function Map() {
     const map = useRef(null);
     
     // global layers:
-    const [treeLayers, setTreeLayers] = useState(['treesOne', 'treesTwo', 'treesThree', 'treesFour', 'treesFive', 'treesSix', 'treesSeven', 'treesEight', 'treesNine'])
+    const [treeLayers, setTreeLayers] = useState(['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'])
     const [postcodeLayers, setPostcodeLayers] = useState([]);
     const [postcodeLineLayers, setPostcodeLineLayers] = useState([]);
+    const [postcodeTextLayers, setPostcodeTextLayers] = useState([]);
 
     // Use States
     const [trees, setTrees] = useState([]);
     const [singleTreeData, setSingleTreeData] = useState(null);
 
     // chunks of data
-    const [treesOne, setTreesOne] = useState(null);
-    const [treesTwo, setTreesTwo] = useState(null);
-    const [treesThree, setTreesThree] = useState(null);
-    const [treesFour, setTreesFour] = useState(null);
-    const [treesFive, setTreesFive] = useState(null);
-    const [treesSix, setTreesSix] = useState(null);
-    const [treesSeven, setTreesSeven] = useState(null);
-    const [treesEight, setTreesEight] = useState(null);
-    const [treesNine, setTreesNine] = useState(null);
+    const [D1, setD1] = useState(null);
+    const [D2, setD2] = useState(null);
+    const [D3, setD3] = useState(null);
+    const [D4, setD4] = useState(null);
+    const [D5, setD5] = useState(null);
+    const [D6, setD6] = useState(null);
+    const [D7, setD7] = useState(null);
+    const [D8, setD8] = useState(null);
+    const [D9, setD9] = useState(null);
+    const [D10, setD10] = useState(null);
+    const [D11, setD11] = useState(null);
+    const [D12, setD12] = useState(null);
+    const [D6W, setD6W] = useState(null);
 
     // postcodes in double
     const [postcodes, setPostcodes] = useState(null);
@@ -88,12 +93,14 @@ function Map() {
         // Temp arrays to hold layers
         let tempPostcodeLayers = [];
         let tempPostcodeLineLayers = [];
+        let tempPostcodeTextLayers = [];
 
         // loop over the neighborhoods and create a new layer for each
         neighbourhoods.features.forEach((neighbourhood) => {
 
             const layerId = neighbourhood.properties.postcodes;
             const lineLayerId = `${layerId}-line`;
+            const textLayerId = `${layerId}-text`;
 
             if (!map.getLayer(layerId)) {
                 
@@ -110,8 +117,8 @@ function Map() {
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.6,
-                        0.3
+                        0.8,
+                        0.5
                     ],
                     }
                 });
@@ -131,7 +138,7 @@ function Map() {
                     },
                     paint: {  
                     'line-color': '#326932',
-                    'line-width': 1,
+                    'line-width': 2,
                     'line-width-transition': { duration: 600 }, // .6 second transition
                     }
                 });
@@ -139,10 +146,32 @@ function Map() {
                 tempPostcodeLineLayers.push(lineLayerId);
 
             }  
+
+            if (!map.getLayer(textLayerId)) {
+
+                map.addLayer({
+                    id: textLayerId,
+                    type: 'symbol',
+                    source: {
+                        type: 'geojson',
+                        data: neighbourhood
+                    },
+                    layout: {
+                        'text-field': ['to-string', ['get', 'postcodes']],
+                        'text-size': 12 
+                    },
+                    paint: {
+                        'text-color': '#B1FFB1'
+                    }
+                });
+
+                tempPostcodeTextLayers.push(textLayerId)
+            }
         });
 
         setPostcodeLayers(prevLayers => [...prevLayers, ...tempPostcodeLayers]);
         setPostcodeLineLayers(prevLayers => [...prevLayers, ...tempPostcodeLineLayers]);
+        setPostcodeTextLayers(prevLayers => [...prevLayers, ...tempPostcodeTextLayers]);
     
     }
 
@@ -154,7 +183,7 @@ function Map() {
 
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: 'mapbox://styles/mapbox/dark-v11',
+                style: 'mapbox://styles/mapbox/light-v11',
                 center: [-6.278533590277888, 53.31333318416409],
                 zoom: 10,
                 pitch: 0,
@@ -164,19 +193,32 @@ function Map() {
 
             map.current.on('load', () => {
                 add3DBuildings(map.current);
-                fetchTrees(`${BASE_API_URL}/trees/1`, setTreesOne, 1);
-                fetchTrees(`${BASE_API_URL}/trees/2`, setTreesTwo, 2);
-                fetchTrees(`${BASE_API_URL}/trees/3`, setTreesThree, 3);
-                fetchTrees(`${BASE_API_URL}/trees/4`, setTreesFour, 4);
-                fetchTrees(`${BASE_API_URL}/trees/5`, setTreesFive, 5);
-                fetchTrees(`${BASE_API_URL}/trees/6`, setTreesSix, 6);
-                fetchTrees(`${BASE_API_URL}/trees/7`, setTreesSeven, 7);
-                fetchTrees(`${BASE_API_URL}/trees/8`, setTreesEight, 8);
-                fetchTrees(`${BASE_API_URL}/trees/9`, setTreesNine, 9);
+                fetchTrees(`${BASE_API_URL}/trees/1`, setD1, 1);
+                fetchTrees(`${BASE_API_URL}/trees/2`, setD2, 2);
+                fetchTrees(`${BASE_API_URL}/trees/3`, setD3, 3);
+                fetchTrees(`${BASE_API_URL}/trees/4`, setD4, 4);
+                fetchTrees(`${BASE_API_URL}/trees/5`, setD5, 5);
+                fetchTrees(`${BASE_API_URL}/trees/6`, setD6, 6);
+                fetchTrees(`${BASE_API_URL}/trees/7`, setD7, 7);
+                fetchTrees(`${BASE_API_URL}/trees/8`, setD8, 8);
+                fetchTrees(`${BASE_API_URL}/trees/9`, setD9, 9);
+                fetchTrees(`${BASE_API_URL}/trees/10`, setD10, 10);
+                fetchTrees(`${BASE_API_URL}/trees/11`, setD11, 11);
+                fetchTrees(`${BASE_API_URL}/trees/12`, setD12, 12);
+                fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13);
                 handleMouseOver();
             });
+            
+            // below new 3d map style similar to pokemon4
+            // map.current.on('style.load', () => {
+            //     map.setConfigProperty('basemap', 'lightPreset', 'day');
+            // });
         }
-    }, []); // Empty dependency array so this only runs once
+    }, []); // Empty dependency
+
+    useEffect(() => {
+        console.log(D3);
+    }, [D3])
 
     // Fetch neighbourhoods
     useEffect(() => {
@@ -186,7 +228,7 @@ function Map() {
             setPostcodes(data);
         })
         .catch(error => console.error(error));
-    }, []); // Empty dependency array so this only runs once
+    }, []); // Empty dependency
 
     // Add postcodes to map when they're fetched
     useEffect(() => {
@@ -195,17 +237,11 @@ function Map() {
         }
     }, [postcodes]); // Runs whenever postcodes state changes
 
-    // Add postcodes to map when they're fetched
-    useEffect(() => {
-        console.log(postcodes)
-    }, [postcodes]); // Runs whenever postcodes state changes
-
-
     const fetchTrees = async (url, setTreeData, treeNumber) => {
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                const message = `An error has occurred: ${response.status}`;
+                const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;
                 throw new Error(message);
             }
             const data = await response.json();
@@ -266,6 +302,9 @@ function Map() {
                 'id': id,
                 'type': 'circle',
                 'source': id,
+                'layout': {
+                    'visibility': 'none',
+                },
                 'paint': {
                     'circle-color': '#326932',
                     'circle-opacity': 1,
@@ -282,20 +321,27 @@ function Map() {
     
         const addDataToMap = () => {
             const treesData = [
-                {id: 'treesOne', data: treesOne},
-                {id: 'treesTwo', data: treesTwo},
-                {id: 'treesThree', data: treesThree},
-                {id: 'treesFour', data: treesFour},
-                {id: 'treesFive', data: treesFive},
-                {id: 'treesSix', data: treesSix},
-                {id: 'treesSeven', data: treesSeven},
-                {id: 'treesEight', data: treesEight},
-                {id: 'treesNine', data: treesNine},
+                {id: 'D1', data: D1},
+                {id: 'D2', data: D2},
+                {id: 'D3', data: D3},
+                {id: 'D4', data: D4},
+                {id: 'D5', data: D5},
+                {id: 'D6', data: D6},
+                {id: 'D7', data: D7},
+                {id: 'D8', data: D8},
+                {id: 'D9', data: D9},
+                {id: 'D10', data: D10},
+                {id: 'D11', data: D11},
+                {id: 'D12', data: D12},
+                {id: 'D6W', data: D6W},
             ];
         
             treesData.forEach(tree => {
                 if (tree.data && map.current) {
                     addSourceAndLayer(tree.id, tree.data);
+                    if (tree.id == D12){
+                        console.log(console.log(tree.data));
+                    }
                 }
             });
         };
@@ -315,14 +361,14 @@ function Map() {
             }
         };    
 
-    }, [treesOne, treesTwo, treesThree, treesFour, treesFive, treesSix, treesSeven, treesEight, treesNine, map.current]);
+    }, [D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D6W, map.current]);
 
     // Utilities
     const handleMouseOver = () => {
         map.current.on('mousemove', (e) => {
 
             // Query the features under the mouse pointer
-            const features = map.current.queryRenderedFeatures(e.point, { layers: ['treesOne', 'treesTwo', 'treesThree', 'treesFour', 'treesFive', 'treesSix', 'treesSeven', 'treesEight', 'treesNine'] });
+            const features = map.current.queryRenderedFeatures(e.point, { layers: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'] });
             
             if (features.length > 0) {
 

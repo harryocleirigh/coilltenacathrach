@@ -1,13 +1,14 @@
 import pandas as pd
 
 # Load the CSV file
-data = pd.read_csv('august_trees.csv')
+data = pd.read_csv('reduced_trees_postcodes.csv')
 
-# Determine how many rows per file
-rows_per_file = len(data) // 9
+# Group the data by the 'postcodes' column
+groups = data.groupby('postcodes')
 
-for i in range(9):
-    start = i * rows_per_file
-    end = (i + 1) * rows_per_file if i < 8 else None
-    subset = data.iloc[start:end]
-    subset.to_csv(f'august_part{i + 1}.csv', index=False)
+# Loop through the groups and write each one to a separate CSV file
+for name, group in groups:
+    # Replace any non-alphanumeric characters with an underscore to ensure a valid filename
+    safe_name = ''.join(ch if ch.isalnum() else '_' for ch in name)
+    filename = f'august_{safe_name}.csv'
+    group.to_csv(filename, index=False)

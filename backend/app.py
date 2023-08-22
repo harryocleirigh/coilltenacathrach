@@ -36,18 +36,28 @@ def get_all_trees():
     return data
 
 # An array to hold all your preloaded data
-preloaded_data = [None] * 9
+preloaded_data = [None] * 13
+
+# custom array:
+dublin = [1,2,3,4,5,6,7,8,9,10,11,12,13]
 
 # Loading the geojson files
-for i in range(1, 10):
-    preloaded_data[i - 1] = load_geojson(f'data/august_part{i}.geojson')
+for i in dublin:
+    index = i - 1 # Adjust the index
+    if i % 13 == 0:
+        preloaded_data[12] = load_geojson(f'data/Dublin_6W.geojson')
+    else:
+        preloaded_data[index] = load_geojson(f'data/Dublin_{i}.geojson')
 
-# now we want to allocate memory for our db effectively.
-# by default the structure is an array but there are two many records for it to be quick
+# now we want to allocate memory for our db effectively. by default the structure is an array but there are too many records for it to be quick
 all_trees = get_all_trees()
+
 # therefore we are going to convert the array into a 2d dictionary
 all_trees = {tree['id']: tree for tree in all_trees}
 
+print('preloaded data[0]', preloaded_data[0])
+
+# confirmation message that we can launch the front end while testing etc.,
 if all(item is not None for item in preloaded_data):
     print()
     print('all chunked files loaded')

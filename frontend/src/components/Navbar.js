@@ -5,7 +5,7 @@ import '../App.css';
 
 export default function Navbar({ treeLayers, postcodeLayers, postcodeLineLayers, setLayerVisibility }) {
 
-  const [treesAreVisible, setTreesAreVisible] = useState(false);
+  const [treesAreVisible, setTreesAreVisible] = useState(true);
   const [postcodesAreVisible, setPostcodesAreVisible] = useState(false);
 
   return (
