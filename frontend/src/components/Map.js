@@ -138,7 +138,7 @@ function Map() {
                     },
                     paint: {  
                     'line-color': '#326932',
-                    'line-width': 2,
+                    'line-width': 3,
                     'line-width-transition': { duration: 600 }, // .6 second transition
                     }
                 });
@@ -183,10 +183,10 @@ function Map() {
 
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: 'mapbox://styles/mapbox/light-v11',
+                style: 'mapbox://styles/mapbox/dark-v11',
                 center: [-6.278533590277888, 53.31333318416409],
                 zoom: 10,
-                pitch: 0,
+                pitch: 30,
                 maxZoom: 15,
                 minZoom: 11
             });
