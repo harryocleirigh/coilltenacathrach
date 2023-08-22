@@ -8,8 +8,6 @@ import neighbourhoods from '../data/revisedneighbourhood.geojson'
 
 function Map() {
 
-    let popup; // Create a variable to hold the current popup
-
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
     const BASE_API_URL = 'http://127.0.0.1:5000'
     const STYLE = 'mapbox://styles/harryocleirigh/clkp8dbvm00ls01phf9bl7of1';   
@@ -27,6 +25,29 @@ function Map() {
     // Use States
     const [trees, setTrees] = useState([]);
     const [singleTreeData, setSingleTreeData] = useState(null);
+
+    // Pop up properties  
+    const markerHeight = 10;
+    const markerRadius = 10;
+    const linearOffset = 5;
+
+    const popupOffsets = {
+        'top': [0, 0],
+        'top-left': [0, 0],
+        'top-right': [0, 0],
+        'bottom': [0, -markerHeight],
+        'bottom-left': [linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
+        'bottom-right': [-linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
+        'left': [markerRadius, (markerHeight - markerRadius) * -1],
+        'right': [-markerRadius, (markerHeight - markerRadius) * -1]
+    };
+
+    // Instantiate popup once and reuse it
+    const popup = useRef(new mapboxgl.Popup({
+        offset: popupOffsets,
+        closeButton: false,
+        closeOnClick: false,
+    }));
 
     // chunks of data
     const [D1, setD1] = useState(null);
@@ -269,15 +290,12 @@ function Map() {
             const data = await response.json();
             setSingleTreeData(data);
 
-            if (popup) {
-                popup.remove();
+            if (popup.current) {
+                popup.current.remove();
             }
     
             // Create the popup after data has been fetched and set
-            popup = new mapboxgl.Popup({ offset: 25 })
-                .setLngLat(tree.geometry.coordinates)
-                .setHTML(`<p>${data.Species_Co}</p>`) // Use `data.id` because `data` is the response from the fetch
-                .addTo(map.current);
+            popup.current.setLngLat(tree.geometry.coordinates).setHTML(`<p>${data.Species_Co}</p>`).addTo(map.current);
             
         } catch (error) {
             console.error('Error fetching data for a single tree', error);
@@ -312,8 +330,8 @@ function Map() {
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        15, 1.5,  // At zoom level 14 or less, radius is 2
-                        15.01, 3 // At zoom level 14.01 or more, radius is 4
+                        14, 2,  // At zoom level 14 or less, radius is 2
+                        14.01, 4 // At zoom level 14.01 or more, radius is 4
                     ],
                 }
             }, 'settlement-subdivision-label');
@@ -380,14 +398,16 @@ function Map() {
             } 
         });
     
-        map.current.on('mouseleave', () => {
-
-            if (popup) {
-                popup.remove();
-                popup = null;
-            }
-        });
-    }
+        ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].forEach((layer) => {
+            map.current.on('mouseleave', layer, () => {
+              if (popup.current) {
+                popup.current.remove();
+              }
+              map.current.getCanvas().style.cursor = '';
+            });
+          });
+        };
+        
 
     const setLayerVisibility = (layerIds, isVisible) => {
         layerIds.forEach(layerId => {
