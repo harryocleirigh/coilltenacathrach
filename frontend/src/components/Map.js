@@ -135,12 +135,12 @@ function Map() {
                     },
                     paint: {
                     'fill-color': '#326932', // fill color
-                    'fill-opacity-transition': { duration: 600 }, // .6 second transition
+                    'fill-opacity-transition': { duration: 0.4 }, // .6 second transition
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
                         0.8,
-                        0.5
+                        0.4
                     ],
                     }
                 });
@@ -159,8 +159,8 @@ function Map() {
                     data: neighbourhood
                     },
                     paint: {  
-                    'line-color': '#326932',
-                    'line-width': 3,
+                    'line-color': '#b6d7a8',
+                    'line-width': 1,
                     'line-width-transition': { duration: 600 }, // .6 second transition
                     }
                 });
@@ -227,19 +227,8 @@ function Map() {
                 fetchTrees(`${BASE_API_URL}/trees/11`, setD11, 11);
                 fetchTrees(`${BASE_API_URL}/trees/12`, setD12, 12);
                 fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13);
-                handleMouseOver();
             });
         }
-    }, []); // Empty dependency
-
-    // Fetch neighbourhoods
-    useEffect(() => {
-        fetch(neighbourhoods)
-        .then(response => response.json())
-        .then(data => {
-            setPostcodes(data);
-        })
-        .catch(error => console.error(error));
     }, []); // Empty dependency
 
     // Set up an event listener for the style.load event
@@ -256,52 +245,10 @@ function Map() {
         if (map.current && postcodes && isStyleLoaded) {
             addPostcodes(map.current, postcodes);
         }
-    }, [postcodes, isStyleLoaded]); // Runs whenever postcodes state or isStyleLoaded state changes
-
-    const fetchTrees = async (url, setTreeData, treeNumber) => {
-        try {
-            console.log('Fetching:', url);
-            const response = await fetch(url);
-            if (!response.ok) {
-                const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;
-                throw new Error(message);
-            }
-            const data = await response.json();
-            setTreeData(data);
-        } 
-        catch (err) {
-            console.log(err);
-            if (retryCount.current < 3) {
-                retryCount.current++;
-                setTimeout(() => fetchTrees(url, setTreeData, treeNumber), 3000);
-            } 
-            else {
-                setError(`Failed to fetch Trees ${treeNumber}`);
-                setTreeData([]);
-            }
+        if (map.current && postcodes && postcodes.features) {
+            initialiseMouseEvents(map.current, postcodes);
         }
-    };
-
-    const fetchSingleTree = async (ID, tree) => {
-        try {
-            const response = await fetch(`${BASE_API_URL}/singletree/${ID}`);
-            if (!response.ok) {
-                throw new Error('There has been an error getting the tree data');
-            }
-            const data = await response.json();
-            setSingleTreeData(data);
-
-            if (popup.current) {
-                popup.current.remove();
-            }
-    
-            // Create the popup after data has been fetched and set
-            popup.current.setLngLat(tree.geometry.coordinates).setHTML(`<p>${data.Species_Co}</p>`).addTo(map.current);
-            
-        } catch (error) {
-            console.error('Error fetching data for a single tree', error);
-        }   
-    }
+    }, [postcodes, isStyleLoaded, map]); // Runs whenever postcodes state or isStyleLoaded state changes
 
     useEffect(() => {
         
@@ -382,41 +329,166 @@ function Map() {
 
     }, [D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D6W, map.current]);
 
-    // Utilities
-    const handleMouseOver = () => {
-        map.current.on('mousemove', (e) => {
+    const initialiseMouseEvents = (map) => {
 
-            // Query the features under the mouse pointer
-            const features = map.current.queryRenderedFeatures(e.point, { layers: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'] });
+        postcodes.features.forEach((postcode) => {
+
+            map.on('mousemove', postcode.properties.postcodes, (e) => handleMouseMovePostcode(postcode, map, e))
+
+            map.on('mouseleave', postcode.properties.postcodes, () => handleMouseLeavePostcode(postcode, map))
+
+            map.on('click', postcode.properties.postcodes, (e) => handleClickPostcode(postcode, map, e))
+        
+        },
+
+        handleMouseOverTree()
+
+    )};
+
+    const handleMouseMovePostcode = (postcode, map) => {
+        
+        const layerId = postcode.properties.postcodes;
+        const lineLayerId = `${layerId}-line`;
+    
+        map.getCanvas().style.cursor = 'pointer';
+        map.setPaintProperty(layerId, 'fill-opacity', 0.8);
+        map.setPaintProperty(lineLayerId, 'line-width', 3);
+
+    };
+
+    const handleMouseLeavePostcode = (postcode, map) => {
+
+        const layerId = postcode.properties.postcodes;
+        const lineLayerId = `${layerId}-line`;
+
+        map.getCanvas().style.cursor = '';
+        map.setPaintProperty(layerId, 'fill-opacity', 0.6);
+        map.setPaintProperty(lineLayerId, 'line-width', 1);
+
+    };
+
+    const handleClickPostcode = (postcode, map, e) => {
+
+        const features = map.queryRenderedFeatures(e.point);
+
+        const clickedPostCode = postcode.properties.postcodes
+
+        if (features.length > 0) {
             
+            postcodes.features.forEach((postcode) => {
+
+                const layerId = postcode.properties.postcodes;
+                const lineLayerId = `${layerId}-line`;
+
+                if (clickedPostCode != layerId){
+                    map.setPaintProperty(layerId, 'fill-opacity', 0);
+                    map.setPaintProperty(lineLayerId, 'line-width', 0);
+                }            
+            });
+
+            
+            // calculate the centre of the tile using turf 
+
+            // zoom into the centre
+
+            // set line width to dotted
+
+            // populate the screen with trees only for this area
+
+            // allow mouseover for trees
+
+            // change the boolean to show a floating summary box
+
+        }
+
+    };
+
+    const handleMouseOverTree = () => {
+        
+        map.current.on('mousemove', (e) => {
+            const features = map.current.queryRenderedFeatures(e.point, { layers: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'] });
             if (features.length > 0) {
-
                 map.current.getCanvas().style.cursor = 'pointer';
-
                 const tree = features[0];
                 const singleTree = tree.properties.id;
                 fetchSingleTree(singleTree, tree);
-            } 
+            }
         });
-    
+
         ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].forEach((layer) => {
             map.current.on('mouseleave', layer, () => {
-              if (popup.current) {
-                popup.current.remove();
-              }
-              map.current.getCanvas().style.cursor = '';
+                if (popup.current) {
+                    popup.current.remove();
+                }
+                map.current.getCanvas().style.cursor = '';
             });
-          });
-        };
-        
+        });
+    };
 
-    const setLayerVisibility = (layerIds, isVisible) => {
+    const setLayersVisibility = (layerIds, isVisible) => {
         layerIds.forEach(layerId => {
             if (map.current.getLayer(layerId)) {
                 map.current.setLayoutProperty(layerId, 'visibility', isVisible ? 'visible' : 'none');
             }
         });
+    };
+
+    // fetch operations
+
+    const fetchTrees = async (url, setTreeData, treeNumber) => {
+        try {
+            console.log('Fetching:', url);
+            const response = await fetch(url);
+            if (!response.ok) {
+                const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;
+                throw new Error(message);
+            }
+            const data = await response.json();
+            setTreeData(data);
+        } 
+        catch (err) {
+            console.log(err);
+            if (retryCount.current < 3) {
+                retryCount.current++;
+                setTimeout(() => fetchTrees(url, setTreeData, treeNumber), 3000);
+            } 
+            else {
+                setError(`Failed to fetch Trees ${treeNumber}`);
+                setTreeData([]);
+            }
+        }
+    };
+
+    const fetchSingleTree = async (ID, tree) => {
+        try {
+            const response = await fetch(`${BASE_API_URL}/singletree/${ID}`);
+            if (!response.ok) {
+                throw new Error('There has been an error getting the tree data');
+            }
+            const data = await response.json();
+            setSingleTreeData(data);
+
+            if (popup.current) {
+                popup.current.remove();
+            }
+    
+            // Create the popup after data has been fetched and set
+            popup.current.setLngLat(tree.geometry.coordinates).setHTML(`<p>${data.Species_Co}</p>`).addTo(map.current);
+            
+        } catch (error) {
+            console.error('Error fetching data for a single tree', error);
+        }   
     }
+
+    // Fetch postcodes
+    useEffect(() => {
+        fetch(neighbourhoods)
+        .then(response => response.json())
+        .then(data => {
+            setPostcodes(data);
+        })
+        .catch(error => console.error(error));
+    }, []); // Empty dependency
 
     return  (
         <div>
@@ -425,10 +497,10 @@ function Map() {
                 treeLayers={treeLayers}
                 postcodeLayers={postcodeLayers}
                 postcodeLineLayers={postcodeLineLayers}
-                setLayerVisibility={setLayerVisibility}
+                setLayersVisibility={setLayersVisibility}
             />
         </div>
-    )
+    );
 }
 
 export default Map;

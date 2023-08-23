@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import '../App.css';
 
 
-export default function Navbar({ treeLayers, postcodeLayers, postcodeLineLayers, setLayerVisibility }) {
+export default function Navbar({ treeLayers, postcodeLayers, postcodeLineLayers, setLayersVisibility }) {
 
   const [treesAreVisible, setTreesAreVisible] = useState(true);
   const [postcodesAreVisible, setPostcodesAreVisible] = useState(false);
@@ -15,8 +15,8 @@ export default function Navbar({ treeLayers, postcodeLayers, postcodeLineLayers,
       <button className="transparent-button" >
         </button>
       </div>
-      <button onClick={() => {setLayerVisibility(treeLayers, treesAreVisible); setTreesAreVisible(!treesAreVisible)}}>Show/Hide Trees</button>
-      <button onClick={() => {setLayerVisibility(postcodeLayers, postcodesAreVisible); setPostcodesAreVisible(!postcodesAreVisible)}}>Show/Hide Postcodes</button>
+      <button onClick={() => {setLayersVisibility(treeLayers, treesAreVisible); setTreesAreVisible(!treesAreVisible)}}>Show/Hide Trees</button>
+      <button onClick={() => {setLayersVisibility(postcodeLayers, postcodesAreVisible); setPostcodesAreVisible(!postcodesAreVisible)}}>Show/Hide Postcodes</button>
     </div>
   );
 } 
