@@ -206,10 +206,10 @@ function Map() {
                 container: mapContainer.current,
                 style: 'mapbox://styles/mapbox/dark-v11',
                 center: [-6.278533590277888, 53.31333318416409],
-                zoom: 10,
+                zoom: 11,
                 pitch: 30,
-                maxZoom: 15,
-                minZoom: 11
+                maxZoom: 20,
+                minZoom: 10
             });
 
             map.current.on('load', () => {
