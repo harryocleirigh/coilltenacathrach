@@ -9,7 +9,7 @@ import neighbourhoods from '../data/revisedneighbourhood.geojson'
 function Map() {
 
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
-    const BASE_API_URL = 'http://127.0.0.1:5000'
+    const BASE_API_URL = 'http://127.0.0.1:8000'
     const STYLE = 'mapbox://styles/harryocleirigh/clkp8dbvm00ls01phf9bl7of1';   
     const LIGHT_TREE_THEME = '#C1E1C1'
     const DARK_TREE_THEME = '#326932'
@@ -260,6 +260,7 @@ function Map() {
 
     const fetchTrees = async (url, setTreeData, treeNumber) => {
         try {
+            console.log('Fetching:', url);
             const response = await fetch(url);
             if (!response.ok) {
                 const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;

@@ -55,14 +55,9 @@ all_trees = get_all_trees()
 # therefore we are going to convert the array into a 2d dictionary
 all_trees = {tree['id']: tree for tree in all_trees}
 
-print('preloaded data[0]', preloaded_data[0])
-
 # confirmation message that we can launch the front end while testing etc.,
 if all(item is not None for item in preloaded_data):
-    print()
     print('all chunked files loaded')
-    print('lets go girls 😎')
-    print()
 
 # Define a single route that accepts a part number as a parameter
 @app.route('/trees/<int:part_number>', methods=['GET'])
@@ -70,12 +65,8 @@ def getTreesPart(part_number):
     if preloaded_data[part_number - 1] is None:
         return jsonify({"error": f"Part{part_number} data could not be loaded"}), 500
     else:
-        # for csv route
-        # geojson = preloaded_data[part_number - 1].to_json()
-        # return Response(response=geojson, mimetype="application/json")
-
-        # otherwise lets just send the geojson chunk we made
-        return preloaded_data[part_number - 1], 200
+        response = preloaded_data[part_number - 1]
+        return response, 200
 
 @app.route('/singletree/<int:id>', methods=['GET'])
 def getSingleTree(id):
