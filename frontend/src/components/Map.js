@@ -25,6 +25,7 @@ function Map() {
     // Use States
     const [trees, setTrees] = useState([]);
     const [singleTreeData, setSingleTreeData] = useState(null);
+    const [isStyleLoaded, setIsStyleLoaded] = useState(false);
 
     // Pop up properties  
     const markerHeight = 10;
@@ -193,7 +194,6 @@ function Map() {
         setPostcodeLayers(prevLayers => [...prevLayers, ...tempPostcodeLayers]);
         setPostcodeLineLayers(prevLayers => [...prevLayers, ...tempPostcodeLineLayers]);
         setPostcodeTextLayers(prevLayers => [...prevLayers, ...tempPostcodeTextLayers]);
-    
     }
 
     // Init map
@@ -229,17 +229,8 @@ function Map() {
                 fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13);
                 handleMouseOver();
             });
-            
-            // below new 3d map style similar to pokemon4
-            // map.current.on('style.load', () => {
-            //     map.setConfigProperty('basemap', 'lightPreset', 'day');
-            // });
         }
     }, []); // Empty dependency
-
-    useEffect(() => {
-        console.log(D3);
-    }, [D3])
 
     // Fetch neighbourhoods
     useEffect(() => {
@@ -251,12 +242,21 @@ function Map() {
         .catch(error => console.error(error));
     }, []); // Empty dependency
 
-    // Add postcodes to map when they're fetched
+    // Set up an event listener for the style.load event
     useEffect(() => {
-        if (map.current && postcodes) {
+        if (map.current) {
+        map.current.on('style.load', () => {
+            setIsStyleLoaded(true);
+        });
+        }
+    }, [map]);
+    
+    // Add postcodes to map when they're fetched and the style is loaded
+    useEffect(() => {
+        if (map.current && postcodes && isStyleLoaded) {
             addPostcodes(map.current, postcodes);
         }
-    }, [postcodes]); // Runs whenever postcodes state changes
+    }, [postcodes, isStyleLoaded]); // Runs whenever postcodes state or isStyleLoaded state changes
 
     const fetchTrees = async (url, setTreeData, treeNumber) => {
         try {
