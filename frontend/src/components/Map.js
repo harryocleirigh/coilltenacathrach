@@ -410,7 +410,7 @@ function Map() {
             map.setPaintProperty(lineLayerId, 'line-width', 3);
 
             let shenanagins;
-            if (layerId.length >= 8){
+            if (layerId.length >= 9){
                 shenanagins = layerId.slice(-2)
             } else {
                 shenanagins = layerId.slice(-1)
