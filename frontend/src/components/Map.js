@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Navbar from './Navbar';
+import centroid from '@turf/centroid';
+import { feature } from '@turf/helpers';
 
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
@@ -23,9 +25,9 @@ function Map() {
     const [postcodeTextLayers, setPostcodeTextLayers] = useState([]);
 
     // Use States
-    const [trees, setTrees] = useState([]);
     const [singleTreeData, setSingleTreeData] = useState(null);
     const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+    const isClicked = useRef(false);
 
     // Pop up properties  
     const markerHeight = 10;
@@ -69,8 +71,6 @@ function Map() {
     const [postcodes, setPostcodes] = useState(null);
 
     const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-
     const retryCount = useRef(0);
 
     // fetch data locally - create react app treats imports as static assets and will therefore look to point to a url:
@@ -305,9 +305,6 @@ function Map() {
             treesData.forEach(tree => {
                 if (tree.data && map.current) {
                     addSourceAndLayer(tree.id, tree.data);
-                    if (tree.id == D12){
-                        console.log(console.log(tree.data));
-                    }
                 }
             });
         };
@@ -318,7 +315,7 @@ function Map() {
             // Do cleanup here
             // For instance, remove sources and layers from the map
             if (map.current) {
-                ['treesOne', 'treesTwo', 'treesThree', 'treesFour', 'treesFive', 'treesSix', 'treesSeven', 'treesEight', 'treesNine'].forEach((id) => {
+                ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].forEach((id) => {
                     if (map.current.getSource(id)) {
                         map.current.removeLayer(id);
                         map.current.removeSource(id);
@@ -346,28 +343,35 @@ function Map() {
     )};
 
     const handleMouseMovePostcode = (postcode, map) => {
+
+        if(!isClicked.current){
         
-        const layerId = postcode.properties.postcodes;
-        const lineLayerId = `${layerId}-line`;
-    
-        map.getCanvas().style.cursor = 'pointer';
-        map.setPaintProperty(layerId, 'fill-opacity', 0.8);
-        map.setPaintProperty(lineLayerId, 'line-width', 3);
+            const layerId = postcode.properties.postcodes;
+            const lineLayerId = `${layerId}-line`;
+        
+            map.getCanvas().style.cursor = 'pointer';
+            map.setPaintProperty(layerId, 'fill-opacity', 0.8);
+            map.setPaintProperty(lineLayerId, 'line-width', 3);
+        }
 
     };
 
     const handleMouseLeavePostcode = (postcode, map) => {
 
-        const layerId = postcode.properties.postcodes;
-        const lineLayerId = `${layerId}-line`;
+        if (!isClicked.current){
 
-        map.getCanvas().style.cursor = '';
-        map.setPaintProperty(layerId, 'fill-opacity', 0.6);
-        map.setPaintProperty(lineLayerId, 'line-width', 1);
+            const layerId = postcode.properties.postcodes;
+            const lineLayerId = `${layerId}-line`;
 
+            map.getCanvas().style.cursor = '';
+            map.setPaintProperty(layerId, 'fill-opacity', 0.5);
+            map.setPaintProperty(lineLayerId, 'line-width', 1);
+        }
     };
 
     const handleClickPostcode = (postcode, map, e) => {
+
+        isClicked.current = true;
 
         const features = map.queryRenderedFeatures(e.point);
 
@@ -386,16 +390,33 @@ function Map() {
                 }            
             });
 
-            
-            // calculate the centre of the tile using turf 
+            const [firstFeature] = features;
 
-            // zoom into the centre
+            // Create a GeoJSON feature object from the clicked feature
+            const geojsonFeature = feature(firstFeature.geometry);
+      
+            // Use turf to calculate the centroid of the feature
+            const featureCentroid = centroid(geojsonFeature);
+      
+            // Get the coordinates of the centroid
+            const [lng, lat] = featureCentroid.geometry.coordinates;
+      
+            // Fly to the centroid of the polygon
+            map.flyTo({ center: [lng, lat], zoom: 13, essential: true });
 
-            // set line width to dotted
+            const layerId = postcode.properties.postcodes;
+            const lineLayerId = `${layerId}-line`;
+            map.setPaintProperty(layerId, 'fill-opacity', 0);
+            map.setPaintProperty(lineLayerId, 'line-width', 3);
 
-            // populate the screen with trees only for this area
+            let shenanagins;
+            if (layerId.length >= 8){
+                shenanagins = layerId.slice(-2)
+            } else {
+                shenanagins = layerId.slice(-1)
+            }
 
-            // allow mouseover for trees
+            map.setLayoutProperty(`D${shenanagins}`, 'visibility', 'visible');
 
             // change the boolean to show a floating summary box
 
@@ -403,10 +424,14 @@ function Map() {
 
     };
 
+    const getExistingLayers = () => {
+        return ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].filter(layer => map.current.getLayer(layer));
+    };   
+
     const handleMouseOverTree = () => {
-        
         map.current.on('mousemove', (e) => {
-            const features = map.current.queryRenderedFeatures(e.point, { layers: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'] });
+            const existingLayers = getExistingLayers();
+            const features = map.current.queryRenderedFeatures(e.point, { layers: existingLayers });
             if (features.length > 0) {
                 map.current.getCanvas().style.cursor = 'pointer';
                 const tree = features[0];
@@ -414,8 +439,8 @@ function Map() {
                 fetchSingleTree(singleTree, tree);
             }
         });
-
-        ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].forEach((layer) => {
+    
+        getExistingLayers().forEach((layer) => {
             map.current.on('mouseleave', layer, () => {
                 if (popup.current) {
                     popup.current.remove();
@@ -424,6 +449,7 @@ function Map() {
             });
         });
     };
+    
 
     const setLayersVisibility = (layerIds, isVisible) => {
         layerIds.forEach(layerId => {
