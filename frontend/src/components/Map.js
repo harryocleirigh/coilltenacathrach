@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Navbar from './Navbar';
+import SummaryBox from './SummaryBox'
 import centroid from '@turf/centroid';
 import { feature } from '@turf/helpers';
 
@@ -24,10 +25,15 @@ function Map() {
     const [postcodeLineLayers, setPostcodeLineLayers] = useState([]);
     const [postcodeTextLayers, setPostcodeTextLayers] = useState([]);
 
-    // Use States
+    // Use States and Refs
     const [singleTreeData, setSingleTreeData] = useState(null);
     const [isStyleLoaded, setIsStyleLoaded] = useState(false);
     const isClicked = useRef(false);
+
+    const [isSummaryBoxShowing, setIsSummaryBoxShowing] = useState(false);
+    const [selectedPostcode, setSelectedPostcode] = useState(null);
+
+    const [treeStats, setTreeStats] = useState(null);
 
     // Pop up properties  
     const markerHeight = 10;
@@ -67,14 +73,30 @@ function Map() {
     const [D12, setD12] = useState(null);
     const [D6W, setD6W] = useState(null);
 
-    // postcodes in double
+    // hashmap to access chunked data very quickly from slicing postcode string Dublin 1 = 1 etc.,
+    const postcodeToData = {
+        "1": D1,
+        "2": D2,
+        "3": D3,
+        "4": D4,
+        "5": D5,
+        "6": D6,
+        "7": D7,
+        "8": D8,
+        "9": D9,
+        "10": D10,
+        "11": D11,
+        "12": D12,
+        "6W": D6W
+    };
+
+    // postcodes in Dublin
     const [postcodes, setPostcodes] = useState(null);
 
     const [error, setError] = useState(null);
     const retryCount = useRef(0);
 
     // fetch data locally - create react app treats imports as static assets and will therefore look to point to a url:
-    // on mount fetch this data
 
     const add3DBuildings = (map) => {
 
@@ -370,7 +392,9 @@ function Map() {
     };
 
     const handleClickPostcode = (postcode, map, e) => {
-
+        
+        setSelectedPostcode(postcode.properties.postcodes);
+        
         isClicked.current = true;
 
         const features = map.queryRenderedFeatures(e.point);
@@ -409,16 +433,16 @@ function Map() {
             map.setPaintProperty(layerId, 'fill-opacity', 0);
             map.setPaintProperty(lineLayerId, 'line-width', 3);
 
-            let shenanagins;
+            let singlePostcode;
             if (layerId.length >= 9){
-                shenanagins = layerId.slice(-2)
+                singlePostcode = layerId.slice(-2)
             } else {
-                shenanagins = layerId.slice(-1)
+                singlePostcode = layerId.slice(-1)
             }
 
-            map.setLayoutProperty(`D${shenanagins}`, 'visibility', 'visible');
+            map.setLayoutProperty(`D${singlePostcode}`, 'visibility', 'visible');
 
-            // change the boolean to show a floating summary box
+            setIsSummaryBoxShowing(true);
 
         }
 
@@ -450,7 +474,6 @@ function Map() {
         });
     };
     
-
     const setLayersVisibility = (layerIds, isVisible) => {
         layerIds.forEach(layerId => {
             if (map.current.getLayer(layerId)) {
@@ -463,7 +486,6 @@ function Map() {
 
     const fetchTrees = async (url, setTreeData, treeNumber) => {
         try {
-            console.log('Fetching:', url);
             const response = await fetch(url);
             if (!response.ok) {
                 const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;
@@ -516,9 +538,52 @@ function Map() {
         .catch(error => console.error(error));
     }, []); // Empty dependency
 
+    // Define the tally function outside the component for better performance
+    const tallySpecies = features => {
+        return features.reduce((hashmap, feature) => {
+            const species = feature.properties.species;
+            if (species !== null) {
+                hashmap[species] = (hashmap[species] || 0) + 1;
+            }
+            return hashmap; 
+        }, {});
+    };
+        
+    useEffect(() => {
+
+        if(selectedPostcode){
+
+            let singlePostcode; 
+
+            if (selectedPostcode.length >= 9){
+                singlePostcode = selectedPostcode.slice(-2)
+            } else {
+                singlePostcode = selectedPostcode.slice(-1)
+            }
+
+            const postcodeData = postcodeToData[singlePostcode]
+
+            if (postcodeData){
+                const speciesTally = tallySpecies(postcodeData.features); 
+                setTreeStats(speciesTally);
+            }
+        }       
+
+    }, [selectedPostcode])
+
+
     return  (
         <div>
-            <div ref={mapContainer} style={{ width: '100%', height: '100vh' }} />
+        
+            <div ref={mapContainer} style={{ width: '100%', height: '100vh' }}> 
+
+            {isSummaryBoxShowing ? (
+                <SummaryBox
+                    selectedPostcode={selectedPostcode}
+                    treeStats={treeStats}
+                />
+                ) : <></>}
+
             <Navbar 
                 treeLayers={treeLayers}
                 postcodeLayers={postcodeLayers}
@@ -526,6 +591,8 @@ function Map() {
                 setLayersVisibility={setLayersVisibility}
             />
         </div>
+
+    </div>
     );
 }
 
