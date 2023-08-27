@@ -10,8 +10,6 @@ function SummaryBox ({selectedPostcode, treeStats}){
     const [chartData, setChartData] = useState(null);
     const [chartOptions, setChartOptions] = useState(null);
 
-    const chartRef = useRef(null);
-
     useEffect(() => {
 
         if (treeStats) {

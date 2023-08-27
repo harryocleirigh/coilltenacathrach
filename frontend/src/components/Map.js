@@ -97,7 +97,6 @@ function Map() {
     const retryCount = useRef(0);
 
     // fetch data locally - create react app treats imports as static assets and will therefore look to point to a url:
-
     const add3DBuildings = (map) => {
 
         map.addLayer({
