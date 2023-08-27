@@ -97,7 +97,6 @@ function Map() {
     const retryCount = useRef(0);
 
     // fetch data locally - create react app treats imports as static assets and will therefore look to point to a url:
-
     const add3DBuildings = (map) => {
 
         map.addLayer({
@@ -392,59 +391,62 @@ function Map() {
     };
 
     const handleClickPostcode = (postcode, map, e) => {
+
+        // if (!isClicked.current){
         
-        setSelectedPostcode(postcode.properties.postcodes);
-        
-        isClicked.current = true;
-
-        const features = map.queryRenderedFeatures(e.point);
-
-        const clickedPostCode = postcode.properties.postcodes
-
-        if (features.length > 0) {
+            setSelectedPostcode(postcode.properties.postcodes);
             
-            postcodes.features.forEach((postcode) => {
+            isClicked.current = true;
+
+            const features = map.queryRenderedFeatures(e.point);
+
+            const clickedPostCode = postcode.properties.postcodes
+
+            if (features.length > 0) {
+                
+                postcodes.features.forEach((postcode) => {
+
+                    const layerId = postcode.properties.postcodes;
+                    const lineLayerId = `${layerId}-line`;
+
+                    if (clickedPostCode != layerId){
+                        map.setPaintProperty(layerId, 'fill-opacity', 0);
+                        map.setPaintProperty(lineLayerId, 'line-width', 0);
+                    }            
+                });
+
+                const [firstFeature] = features;
+
+                // Create a GeoJSON feature object from the clicked feature
+                const geojsonFeature = feature(firstFeature.geometry);
+        
+                // Use turf to calculate the centroid of the feature
+                const featureCentroid = centroid(geojsonFeature);
+        
+                // Get the coordinates of the centroid
+                const [lng, lat] = featureCentroid.geometry.coordinates;
+        
+                // Fly to the centroid of the polygon
+                map.flyTo({ center: [lng, lat], zoom: 13, essential: true });
 
                 const layerId = postcode.properties.postcodes;
                 const lineLayerId = `${layerId}-line`;
+                map.setPaintProperty(layerId, 'fill-opacity', 0.3);
+                map.setPaintProperty(lineLayerId, 'line-width', 3);
 
-                if (clickedPostCode != layerId){
-                    map.setPaintProperty(layerId, 'fill-opacity', 0);
-                    map.setPaintProperty(lineLayerId, 'line-width', 0);
-                }            
-            });
+                let singlePostcode;
+                if (layerId.length >= 9){
+                    singlePostcode = layerId.slice(-2)
+                } else {
+                    singlePostcode = layerId.slice(-1)
+                }
 
-            const [firstFeature] = features;
+                map.setLayoutProperty(`D${singlePostcode}`, 'visibility', 'visible');
 
-            // Create a GeoJSON feature object from the clicked feature
-            const geojsonFeature = feature(firstFeature.geometry);
-      
-            // Use turf to calculate the centroid of the feature
-            const featureCentroid = centroid(geojsonFeature);
-      
-            // Get the coordinates of the centroid
-            const [lng, lat] = featureCentroid.geometry.coordinates;
-      
-            // Fly to the centroid of the polygon
-            map.flyTo({ center: [lng, lat], zoom: 13, essential: true });
+                setIsSummaryBoxShowing(true);
 
-            const layerId = postcode.properties.postcodes;
-            const lineLayerId = `${layerId}-line`;
-            map.setPaintProperty(layerId, 'fill-opacity', 0);
-            map.setPaintProperty(lineLayerId, 'line-width', 3);
-
-            let singlePostcode;
-            if (layerId.length >= 9){
-                singlePostcode = layerId.slice(-2)
-            } else {
-                singlePostcode = layerId.slice(-1)
             }
-
-            map.setLayoutProperty(`D${singlePostcode}`, 'visibility', 'visible');
-
-            setIsSummaryBoxShowing(true);
-
-        }
+        // }
 
     };
 
@@ -457,10 +459,13 @@ function Map() {
             const existingLayers = getExistingLayers();
             const features = map.current.queryRenderedFeatures(e.point, { layers: existingLayers });
             if (features.length > 0) {
-                map.current.getCanvas().style.cursor = 'pointer';
                 const tree = features[0];
                 const singleTree = tree.properties.id;
-                fetchSingleTree(singleTree, tree);
+                if (singleTree){
+                    map.current.getCanvas().style.cursor = 'pointer';
+                    fetchSingleTree(singleTree, tree);
+                }
+                map.current.getCanvas().style.current = '';
             }
         });
     
@@ -483,7 +488,6 @@ function Map() {
     };
 
     // fetch operations
-
     const fetchTrees = async (url, setTreeData, treeNumber) => {
         try {
             const response = await fetch(url);
@@ -539,7 +543,7 @@ function Map() {
     }, []); // Empty dependency
 
     // Define the tally function outside the component for better performance
-    const tallySpecies = features => {
+    const tallySpecies = (features) => {
         return features.reduce((hashmap, feature) => {
             const species = feature.properties.species;
             if (species !== null) {
@@ -548,7 +552,8 @@ function Map() {
             return hashmap; 
         }, {});
     };
-        
+    
+    // use effect to handle requests to get the data for the chart bar
     useEffect(() => {
 
         if(selectedPostcode){
@@ -570,7 +575,6 @@ function Map() {
         }       
 
     }, [selectedPostcode])
-
 
     return  (
         <div>

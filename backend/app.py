@@ -49,16 +49,15 @@ def getTreesPart(part_number):
     c = conn.cursor()
 
     if part_number == 13:
-        c.execute(f'SELECT * FROM Dublin_6W')
+        c.execute('SELECT id, POINT_X, POINT_Y, species FROM Dublin_6W')
     else:
-        c.execute(f'SELECT * FROM Dublin_{part_number}')
+        c.execute(f'SELECT id, POINT_X, POINT_Y, species FROM Dublin_{part_number}')
     
     data = c.fetchall()
     columns = [desc[0] for desc in c.description]
     conn.close()
 
-    df = pd.DataFrame(data, columns=columns) # Create a DataFrame
-    df = df.drop(['index', 'Unnamed: 0'], axis=1)
+    df = pd.DataFrame(data, columns=columns)
     gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.POINT_X, df.POINT_Y))
     geojson = gdf.to_json()
 

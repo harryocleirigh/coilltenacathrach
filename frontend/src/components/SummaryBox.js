@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+import React, { useEffect, useState, useRef } from 'react';
+import { Pie } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import '../App.css';
 
@@ -19,14 +19,14 @@ function SummaryBox ({selectedPostcode, treeStats}){
             // Sort the treeStats by value in descending order
             const sortedTreeStatsArray = Object.entries(treeStats)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 8);
+                .slice(0, 12);
 
             // Convert the sorted array back to an object
-            const top10TreeStats = Object.fromEntries(sortedTreeStatsArray);
+            const topTreeStats = Object.fromEntries(sortedTreeStatsArray);
 
             // If you need to extract the labels and data separately:
-            const extractedLabels = Object.keys(top10TreeStats);
-            const extractedData = Object.values(top10TreeStats);
+            const extractedLabels = Object.keys(topTreeStats);
+            const extractedData = Object.values(topTreeStats);
             
             setLabels(extractedLabels);
             setData(extractedData);
@@ -45,78 +45,79 @@ function SummaryBox ({selectedPostcode, treeStats}){
         const options = {
             maintainAspectRatio: false,
             responsive: true,
-            indexAxis: 'y', // Change this to 'y' for horizontal bars
-            scales: {
-                y: { 
-                    beginAtZero: true,
-                    ticks: {
+            plugins: {
+                legend: {
+                    display: true,  // Display legend for Pie charts
+                    position: 'right',
+                    labels: {
                         color: 'white',
                         font: {
                             size: 12,
                             family: 'Inter'
-                        },
-                        autoSkip: true,
-                        maxTicksLimit: 10
-                    },
-                    grid: {
-                        display: false
-                    },
-                },
-                x: {
-                    display: true,
-                    grid: {
-                        display: false,
-                        color: 'white'
-                    },
-                    ticks:{
-                        color: 'white'
+                        }
                     }
-                }
-            },
-            plugins: {
-                legend: {
+                },
+                tooltip: {
+                    backgroundColor: '#333',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                },
+                title: {
                     display: false,
                 },
-                tooltip: {},
-                title: {
-                    display: true,
-                    text: ``,
-                    color: 'white',
-                    font: {
-                        size: 12,
-                        family: 'Inter'  // Set font family to 'Inter' here
-                    },
-                    align: 'center'
-                },
-            },
+            }
         };
         return options;
-    }    
-
+    }
+    
     // function used to make the chart data
     const makeChartData = (names, dataValues) => {
+
+        const colours = [
+            '#66c2a5', // Aqua green
+            '#fc8d62', // Coral
+            '#8da0cb', // Periwinkle blue
+            '#e78ac3', // Orchid pink
+            '#a6d854', // Lime green
+            '#ffd92f', // Sunny yellow
+            '#e5c494', // Sandstone
+            '#b3b3b3', // Grey
+            '#57a0d3', // Sky blue
+            '#d95f02',  // Tangerine
+            '#33a02c', // Forest green
+            '#e31a1c', // Bright red
+            '#ff7f00', // Bright orange
+            '#6a3d9a', // Deep purple
+            '#b15928', // Burnt orange
+            '#f28e2b', // Goldfish orange
+            '#76b7b2', // Teal green
+            '#ff9da7', // Salmon pink
+            '#70ad47'  // Pastel green
+        ];
         
         const data = {
             labels: names,
             datasets: [
-                { 
-                    label: ``,
-                    barThickness: 36,
+                {
                     data: dataValues,
-                    backgroundColor: '#326932'
-                },
+                    backgroundColor: colours.slice(0, dataValues.length)
+                }
             ],
         };
-
-        return data
+    
+        return data;
     }
-
+    
     return (
         <div className='floating-summary-box'>
-            <h1 style={{textAlign: 'center', marginBottom: '0px'}}>Trees of {selectedPostcode}</h1>
+            <h1 style={{textAlign: 'center', marginBottom: '24px'}}>Trees of {selectedPostcode}</h1>
             <div className='chart-holder'>
                 {chartData && chartOptions ? (
-                    <Bar data={chartData} options={chartOptions}/>
+                    <Pie 
+                        style={{height: '100%'}}
+                        data={chartData} 
+                        options={chartOptions}           
+                    />
                 ) : (
                     <p>Loading chart...</p>
                 )}

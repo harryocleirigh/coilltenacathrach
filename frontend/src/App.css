@@ -88,8 +88,8 @@ body{
 .floating-summary-box{
   position: absolute;
   z-index: 100;
-  width: 360px;
-  height: 480px;
+  width: 480px;
+  height: 360px;
   margin-top: 100px;
   left: 72px;
   backdrop-filter: blur(16px) saturate(180%);
@@ -99,11 +99,15 @@ body{
   border: 1px solid rgba(255, 255, 255, 0.125);
   color: white;
   padding: 24px 18px;
-  align-items: left;
   display: flex;
   flex-direction: column;
 }
 
 .chart-holder{
   height: 100%;
+  width: 100%;
+}
+
+.mapboxgl-control-container{
+  display: none;
 }
