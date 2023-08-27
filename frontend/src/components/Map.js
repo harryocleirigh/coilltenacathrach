@@ -366,12 +366,13 @@ function Map() {
 
     const handleMouseMovePostcode = (postcode, map) => {
 
+        map.getCanvas().style.cursor = 'pointer';
+
         if(!isClicked.current){
         
             const layerId = postcode.properties.postcodes;
             const lineLayerId = `${layerId}-line`;
         
-            map.getCanvas().style.cursor = 'pointer';
             map.setPaintProperty(layerId, 'fill-opacity', 0.8);
             map.setPaintProperty(lineLayerId, 'line-width', 3);
         }
@@ -472,6 +473,10 @@ function Map() {
                     fetchSingleTree(singleTree, tree);
                 }
                 map.current.getCanvas().style.current = '';
+            } else {
+                if (popup.current){
+                    popup.current.remove();
+                }
             }
         });
     
