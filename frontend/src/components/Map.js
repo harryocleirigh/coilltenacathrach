@@ -308,6 +308,7 @@ function Map() {
         };
     
         const addDataToMap = () => {
+
             const treesData = [
                 {id: 'D1', data: D1},
                 {id: 'D2', data: D2},
@@ -329,13 +330,18 @@ function Map() {
                     addSourceAndLayer(tree.id, tree.data);
                 }
             });
+        
+            if (isStyleLoaded && treesData.every(item => item.data)) {
+                const allData = [].concat(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D6W);
+                addSourceAndLayer('ALL', allData);
+                console.log('loading in total layer')
+            }
         };
 
-        addDataToMap();
+        addDataToMap();      
 
+        // cleanup job
         return () => {
-            // Do cleanup here
-            // For instance, remove sources and layers from the map
             if (map.current) {
                 ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].forEach((id) => {
                     if (map.current.getSource(id)) {
@@ -617,10 +623,6 @@ function Map() {
             setIsSummaryBoxShowing(false);
         }
     }
-
-    useEffect(() => {
-        console.log('D1: ', D1)
-    }, [D1])
 
     return  (
         <div>
