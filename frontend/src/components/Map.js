@@ -599,6 +599,7 @@ function Map() {
 
         treeLayers.forEach(layer => {
             map.current.setLayoutProperty(layer, 'visibility', 'none');
+            map.current.setFilter(layer, null);
         })
 
         postcodeLayers.forEach(layer => {
@@ -615,8 +616,11 @@ function Map() {
         if (isSummaryBoxShowing){
             setIsSummaryBoxShowing(false);
         }
-
     }
+
+    useEffect(() => {
+        console.log('D1: ', D1)
+    }, [D1])
 
     return  (
         <div>
@@ -625,6 +629,7 @@ function Map() {
 
             {isSummaryBoxShowing ? (
                 <SummaryBox
+                    map={map}
                     selectedPostcode={selectedPostcode}
                     treeStats={treeStats}
                 />
