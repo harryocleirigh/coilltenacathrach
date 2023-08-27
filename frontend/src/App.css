@@ -16,7 +16,10 @@ body{
 }
 
 .transparent-button  {
-  background-color: transparent;
+  background-color: green;
+  height: 40px;
+  width: 150px;
+  color: white;
   border: none;
   padding: 0;
   cursor: pointer;

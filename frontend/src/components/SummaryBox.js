@@ -47,6 +47,7 @@ function SummaryBox ({selectedPostcode, treeStats}){
             responsive: true,
             plugins: {
                 legend: {
+                    onClick: (e, legendItem) => {}, // Disable the default toggling behavior
                     display: true,  // Display legend for Pie charts
                     position: 'right',
                     labels: {
@@ -110,7 +111,7 @@ function SummaryBox ({selectedPostcode, treeStats}){
     
     return (
         <div className='floating-summary-box'>
-            <h1 style={{textAlign: 'center', marginBottom: '24px'}}>Trees of {selectedPostcode}</h1>
+            <h1 style={{textAlign: 'center', marginBottom: '30px'}}>Trees of {selectedPostcode}</h1>
             <div className='chart-holder'>
                 {chartData && chartOptions ? (
                     <Pie 
