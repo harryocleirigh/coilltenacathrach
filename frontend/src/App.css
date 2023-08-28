@@ -7,11 +7,11 @@ h1 {
 }
 
 h2 {
-  font-size: 18px;
+  font-size: 15px;
 }
 
 p {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .map-container{
@@ -29,8 +29,8 @@ a {
 .navbar  {
   position: absolute;
   top: 24px;
-  left: 48px;
-  right: 48px;
+  left: 24px;
+  right: 24px;
   height: 48px;
   color: white;
   display: flex;
@@ -50,7 +50,6 @@ a {
 }
 
 .navbar-links  {
-  margin: 50px;
   list-style-type: none;
   display: flex;
   align-items: center;
@@ -193,6 +192,7 @@ a {
   align-items: center;
   display: flex;
   flex-direction: column;
+  text-align: justify;
 }
 
 .social-links {

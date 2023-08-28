@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../App.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTreeCity } from '@fortawesome/free-solid-svg-icons'
 import { isVisible } from '@testing-library/user-event/dist/utils';
 
 export default function Navbar({ treeLayers, postcodeLayers, resetMap, setPostCodeLayersVisibility, setGlobalLayersVisibility }) {
@@ -11,6 +13,10 @@ export default function Navbar({ treeLayers, postcodeLayers, resetMap, setPostCo
     
     <div className="navbar">
       <div className="navbar-links-wrapper">
+        <FontAwesomeIcon 
+          icon={faTreeCity} 
+          onClick={() => window.location.reload()} 
+          style={{height: '100%', width: '36px', cursor: 'pointer'}}/>
       </div>
       {/* <button onClick={() => {setGlobalLayersVisibility(treeLayers, treesAreVisible); setTreesAreVisible(!treesAreVisible)}}>Show/Hide Trees</button>
       <button onClick={() => {setPostCodeLayersVisibility(postcodeLayers, postcodesAreVisible); setPostcodesAreVisible(!postcodesAreVisible); console.log(postcodeLayers)}}>Show/Hide Postcodes</button> */}
