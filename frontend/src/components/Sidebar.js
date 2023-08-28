@@ -15,17 +15,21 @@ function Sidebar () {
                 <p>The formulation of the Dublin tree database used for this project was generously backed by a research grant from Ireland’s Environmental Protection Agency (EPA), and spearheaded by the School of Geography at University College Dublin. This tree database forms an integral part of the "Mapping Green Dublin" initiative, a larger project aimed at comprehensively charting Dublin's green assets.</p>                
                 <p>For a deeper dive into Dublin's tree tapestry, <a className='summary' href='https://zenodo.org/record/3813792#.YuJKj3bMLIV'>explore the full dataset here.</a></p>
             </div>
-            <div className="social-links">
-                <a href='https://github.com/harryocleirigh' target="_blank">
-                    <div className='icon-holder'>        
-                        <FontAwesomeIcon icon={faGithub}/>
-                    </div>
-                </a>
-                <a href='https://www.linkedin.com/in/harry-%C3%B3-97818b14a/' target="_blank">
-                    <div className='icon-holder'>
-                        <FontAwesomeIcon icon={faLinkedinIn}/> 
-                    </div>
-                </a>
+
+            <div className='social-wrapper'>
+                <h4>Want to get in touch? 👇</h4>
+                <div className="social-links">
+                    <a href='https://github.com/harryocleirigh' target="_blank">
+                        <div className='icon-holder'>        
+                            <FontAwesomeIcon icon={faGithub}/>
+                        </div>
+                    </a>
+                    <a href='https://www.linkedin.com/in/harry-%C3%B3-97818b14a/' target="_blank">
+                        <div className='icon-holder'>
+                            <FontAwesomeIcon icon={faLinkedinIn}/> 
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
     );

@@ -223,6 +223,13 @@ a {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
+.social-wrapper{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
 @media screen and (max-width: 900px) {
   .sidebar {
       display: none;
