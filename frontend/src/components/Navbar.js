@@ -14,6 +14,7 @@ export default function Navbar({ treeLayers, postcodeLayers, resetMap, setPostCo
           onClick={() => window.location.reload()} 
           style={{height: '100%', width: '36px', cursor: 'pointer'}}/>
       </div>
+      <h1>Trees of Dublin</h1>
     </div>
   );
 } 

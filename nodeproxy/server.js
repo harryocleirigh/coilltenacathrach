@@ -34,7 +34,9 @@ app.use(compression());
 
 // Middleware for caching
 function cacheMiddleware(duration) {
+
   return (req, res, next) => {
+    
       const key = req.originalUrl || req.url;
       const cachedResponse = cache.get(key);
 
@@ -55,7 +57,6 @@ function cacheMiddleware(duration) {
   };
 }
 
-
 // debugger to see active cache
 app.get('/debug/cache', (req, res) => {
   const keys = cache.keys();
@@ -75,6 +76,7 @@ app.get('/debug/cache', (req, res) => {
 // middleware proxies
 app.use('/trees', cacheMiddleware(3600));
 app.use('/trees', createProxyMiddleware({ 
+
     target: 'http://127.0.0.1:5000',
     changeOrigin: true,
     selfHandleResponse: true, // Add this line to handle the response ourselves
@@ -87,6 +89,7 @@ app.use('/trees', createProxyMiddleware({
       }); 
   
       proxyRes.on('end', () => {
+
           const body = Buffer.concat(bodyChunks).toString();
 
           res.setHeader('Access-Control-Allow-Origin', '*');
@@ -114,7 +117,6 @@ app.use('/trees', createProxyMiddleware({
       });
   }  
 }));
-
 
 app.use('/singletree', createProxyMiddleware({ target: 'http://127.0.0.1:5000', changeOrigin: true }));
 

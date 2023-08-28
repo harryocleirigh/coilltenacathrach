@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Navbar from './Navbar';
@@ -9,6 +9,7 @@ import { feature } from '@turf/helpers';
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
 import Sidebar from './Sidebar';
+import { createBins } from '@turf/turf';
 
 function Map() {
 
@@ -29,6 +30,7 @@ function Map() {
     // Use States and Refs
     const [singleTreeData, setSingleTreeData] = useState(null);
     const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+    const [isAllDataLoaded, setIsAllDataLoaded] = useState(false);
     const isClicked = useRef(false);
 
     const [isSummaryBoxShowing, setIsSummaryBoxShowing] = useState(false);
@@ -237,8 +239,6 @@ function Map() {
     // Init map
     useEffect(() => {
 
-        const startTime = performance.now();
-
         if (!map.current) {
             // swap out access token
             mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
@@ -270,9 +270,8 @@ function Map() {
                     fetchTrees(`${BASE_API_URL}/trees/12`, setD12, 12),
                     fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13),
                 ]).then(() => {
-                    const endTime = performance.now();
-                    const duration = endTime - startTime;
-                    console.log(`Time taken to fetch all 13 chunks: ${duration} milliseconds`);
+                    setIsAllDataLoaded(true)
+                    console.log('all data loaded');
                 })
             });
         }
@@ -369,7 +368,6 @@ function Map() {
                 };
             
                 addSourceAndLayer('ALL', geojsonAllData);
-                console.log('loading in total layer');
             }            
         };
 

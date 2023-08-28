@@ -204,8 +204,9 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     
     const handleMouseMove = (e) => {
         if (!isDragging) return;
-        
+    
         const containerRect = document.querySelector('.map-container').getBoundingClientRect();
+        const navbarRect = document.querySelector('.navbar').getBoundingClientRect();
     
         let x = e.clientX - offsetX;
         let y = e.clientY - offsetY;
@@ -213,14 +214,18 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
         const maxX = containerRect.left + containerRect.width - boxRef.current.clientWidth;
         const maxY = containerRect.top + containerRect.height - boxRef.current.clientHeight;
     
+        // Ensure the box doesn't go above the bottom of the navbar
+        const minY = navbarRect.bottom;
+    
         if (x < containerRect.left) x = containerRect.left;
-        if (y < containerRect.top) y = containerRect.top;
+        if (y < minY) y = minY; // Use minY instead of containerRect.top
         if (x > maxX) x = maxX;
         if (y > maxY) y = maxY;
     
         boxRef.current.style.left = x + 'px';
         boxRef.current.style.top = y + 'px';
     };
+    
     
     const handleMouseUp = (e) => {
         e.preventDefault();
