@@ -14,10 +14,10 @@ function Map() {
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
     const BASE_API_URL = 'http://127.0.0.1:8000'
     const STYLE = 'mapbox://styles/harryocleirigh/clkp8dbvm00ls01phf9bl7of1';   
-    const LIGHT_TREE_THEME = '#C1E1C1'
-    const DARK_TREE_THEME = '#326932'
     const mapContainer = useRef(null);
     const map = useRef(null);
+    const originalLNG = -6.260259
+    const originalLAT = 53.349811
     
     // global layers:
     const [treeLayers, setTreeLayers] = useState(['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'])
@@ -91,7 +91,7 @@ function Map() {
     };
 
     // postcodes in Dublin
-    const [postcodes, setPostcodes] = useState(null);
+    const [postcodes, setPostcodes] = useState('');
 
     const [error, setError] = useState(null);
     const retryCount = useRef(0);
@@ -226,7 +226,7 @@ function Map() {
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
                 style: 'mapbox://styles/mapbox/dark-v11',
-                center: [-6.278533590277888, 53.31333318416409],
+                center: [originalLNG, originalLAT],
                 zoom: 11,
                 pitch: 30,
                 maxZoom: 20,
@@ -300,13 +300,14 @@ function Map() {
                         ['linear'],
                         ['zoom'],
                         14, 2,  // At zoom level 14 or less, radius is 2
-                        14.01, 4 // At zoom level 14.01 or more, radius is 4
+                        14.01, 3 // At zoom level 14.01 or more, radius is 4
                     ],
                 }
             }, 'settlement-subdivision-label');
         };
     
         const addDataToMap = () => {
+
             const treesData = [
                 {id: 'D1', data: D1},
                 {id: 'D2', data: D2},
@@ -328,13 +329,28 @@ function Map() {
                     addSourceAndLayer(tree.id, tree.data);
                 }
             });
+        
+            if (isStyleLoaded && treesData.every(item => item.data)) {
+                const allDataFeatures = [].concat(
+                    D1.features, D2.features, D3.features, D4.features, D5.features, 
+                    D6.features, D7.features, D8.features, D9.features, D10.features, 
+                    D11.features, D12.features, D6W.features
+                );
+            
+                const geojsonAllData = {
+                    type: "FeatureCollection",
+                    features: allDataFeatures
+                };
+            
+                addSourceAndLayer('ALL', geojsonAllData);
+                console.log('loading in total layer');
+            }            
         };
 
-        addDataToMap();
+        addDataToMap();      
 
+        // cleanup job
         return () => {
-            // Do cleanup here
-            // For instance, remove sources and layers from the map
             if (map.current) {
                 ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].forEach((id) => {
                     if (map.current.getSource(id)) {
@@ -365,12 +381,13 @@ function Map() {
 
     const handleMouseMovePostcode = (postcode, map) => {
 
+        map.getCanvas().style.cursor = 'pointer';
+
         if(!isClicked.current){
         
             const layerId = postcode.properties.postcodes;
             const lineLayerId = `${layerId}-line`;
         
-            map.getCanvas().style.cursor = 'pointer';
             map.setPaintProperty(layerId, 'fill-opacity', 0.8);
             map.setPaintProperty(lineLayerId, 'line-width', 3);
         }
@@ -392,61 +409,68 @@ function Map() {
 
     const handleClickPostcode = (postcode, map, e) => {
 
-        // if (!isClicked.current){
-        
-            setSelectedPostcode(postcode.properties.postcodes);
+        if (isClicked.current){
+
+            treeLayers.forEach(layer => {
+                map.setLayoutProperty(layer, 'visibility', 'none');
+            })
             
-            isClicked.current = true;
-
-            const features = map.queryRenderedFeatures(e.point);
-
-            const clickedPostCode = postcode.properties.postcodes
-
-            if (features.length > 0) {
-                
-                postcodes.features.forEach((postcode) => {
-
-                    const layerId = postcode.properties.postcodes;
-                    const lineLayerId = `${layerId}-line`;
-
-                    if (clickedPostCode != layerId){
-                        map.setPaintProperty(layerId, 'fill-opacity', 0);
-                        map.setPaintProperty(lineLayerId, 'line-width', 0);
-                    }            
-                });
-
-                const [firstFeature] = features;
-
-                // Create a GeoJSON feature object from the clicked feature
-                const geojsonFeature = feature(firstFeature.geometry);
+        }
+    
+        setSelectedPostcode(postcode.properties.postcodes);
         
-                // Use turf to calculate the centroid of the feature
-                const featureCentroid = centroid(geojsonFeature);
-        
-                // Get the coordinates of the centroid
-                const [lng, lat] = featureCentroid.geometry.coordinates;
-        
-                // Fly to the centroid of the polygon
-                map.flyTo({ center: [lng, lat], zoom: 13, essential: true });
+        isClicked.current = true;
+
+        const features = map.queryRenderedFeatures(e.point);
+
+        const clickedPostCode = postcode.properties.postcodes
+
+        if (features.length > 0) {
+            
+            postcodes.features.forEach((postcode) => {
 
                 const layerId = postcode.properties.postcodes;
                 const lineLayerId = `${layerId}-line`;
-                map.setPaintProperty(layerId, 'fill-opacity', 0.3);
-                map.setPaintProperty(lineLayerId, 'line-width', 3);
 
-                let singlePostcode;
-                if (layerId.length >= 9){
-                    singlePostcode = layerId.slice(-2)
-                } else {
-                    singlePostcode = layerId.slice(-1)
-                }
+                if (clickedPostCode != layerId){
+                    map.setPaintProperty(layerId, 'fill-opacity', 0);
+                    map.setPaintProperty(lineLayerId, 'line-width', 0);
+                }            
+            });
 
-                map.setLayoutProperty(`D${singlePostcode}`, 'visibility', 'visible');
+            const [firstFeature] = features;
 
-                setIsSummaryBoxShowing(true);
+            // Create a GeoJSON feature object from the clicked feature
+            const geojsonFeature = feature(firstFeature.geometry);
+    
+            // Use turf to calculate the centroid of the feature
+            const featureCentroid = centroid(geojsonFeature);
+    
+            // Get the coordinates of the centroid
+            const [lng, lat] = featureCentroid.geometry.coordinates;
+    
+            // Fly to the centroid of the polygon
+            map.flyTo({ center: [lng, lat], zoom: 13, essential: true });
 
+            const layerId = postcode.properties.postcodes;
+            const lineLayerId = `${layerId}-line`;
+            map.setPaintProperty(layerId, 'fill-opacity', 0.3);
+            map.setPaintProperty(lineLayerId, 'line-width', 3);
+
+            let singlePostcode;
+            if (layerId.length >= 9){
+                // "D______11 => D11"
+                singlePostcode = layerId.slice(-2)
+            } else {
+                // "D______5 => D5"
+                singlePostcode = layerId.slice(-1)
             }
-        // }
+
+            map.setLayoutProperty(`D${singlePostcode}`, 'visibility', 'visible');
+
+            setIsSummaryBoxShowing(true);
+
+        }
 
     };
 
@@ -466,6 +490,10 @@ function Map() {
                     fetchSingleTree(singleTree, tree);
                 }
                 map.current.getCanvas().style.current = '';
+            } else {
+                if (popup.current){
+                    popup.current.remove();
+                }
             }
         });
     
@@ -479,12 +507,35 @@ function Map() {
         });
     };
     
-    const setLayersVisibility = (layerIds, isVisible) => {
+    const setPostCodeLayersVisibility = (layerIds, isVisible) => {
         layerIds.forEach(layerId => {
             if (map.current.getLayer(layerId)) {
-                map.current.setLayoutProperty(layerId, 'visibility', isVisible ? 'visible' : 'none');
+                map.current.setPaintProperty(layerId, 'fill-opacity', 0.5)
+                map.current.setPaintProperty(layerId+'-line', 'line-width', 1)
+                isClicked.current = false;
             }
+            map.current.setLayoutProperty(layerId, 'visibility', isVisible ? 'visible' : 'none');
+            map.current.setLayoutProperty(layerId+'-line', 'visibility', isVisible ? 'visible' : 'none');
         });
+    };
+
+    const setGlobalLayersVisibility = (treeLayers, isVisible) => {
+        
+        treeLayers.forEach(treelayer => {
+            if (map.current.getLayer(treelayer)) { // Ensure the layer exists before trying to modify it
+                map.current.setLayoutProperty(treelayer, 'visibility', isVisible ? 'visible' : 'none');
+            }
+        })
+
+        setTimeout(() => setIsSummaryBoxShowing(true), 500);
+
+        if (map.current.getSource('ALL')) {
+            const allLayerData = map.current.getSource('ALL')._data;
+            if (allLayerData && allLayerData.features) {
+                const speciesTally = tallySpecies(allLayerData.features);
+                setTreeStats(speciesTally);
+            }
+        }  
     };
 
     // fetch operations
@@ -576,6 +627,31 @@ function Map() {
 
     }, [selectedPostcode])
 
+    const resetMap = () => {
+
+        isClicked.current = false;
+
+        treeLayers.forEach(layer => {
+            map.current.setLayoutProperty(layer, 'visibility', 'none');
+            map.current.setFilter(layer, null);
+        })
+
+        postcodeLayers.forEach(layer => {
+            map.current.setPaintProperty(layer, 'fill-opacity', 0.5)
+            map.current.setPaintProperty(layer+'-line', 'line-width', 1)
+        })
+
+        map.current.flyTo({ center: [originalLNG, originalLAT], zoom: 11, essential: true })
+
+        if (popup.current){
+            popup.current.remove()
+        }
+
+        if (isSummaryBoxShowing){
+            setIsSummaryBoxShowing(false);
+        }
+    }
+
     return  (
         <div>
         
@@ -583,8 +659,10 @@ function Map() {
 
             {isSummaryBoxShowing ? (
                 <SummaryBox
+                    map={map}
                     selectedPostcode={selectedPostcode}
                     treeStats={treeStats}
+                    resetMap={resetMap}
                 />
                 ) : <></>}
 
@@ -592,7 +670,8 @@ function Map() {
                 treeLayers={treeLayers}
                 postcodeLayers={postcodeLayers}
                 postcodeLineLayers={postcodeLineLayers}
-                setLayersVisibility={setLayersVisibility}
+                setPostCodeLayersVisibility={setPostCodeLayersVisibility}
+                setGlobalLayersVisibility={setGlobalLayersVisibility}
             />
         </div>
 

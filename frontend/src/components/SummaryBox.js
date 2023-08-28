@@ -1,14 +1,45 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Pie } from 'react-chartjs-2';
-import Chart from 'chart.js/auto';
+import { Pie, getElementsAtEvent } from 'react-chartjs-2';
+import Chart, { ArcElement, Legend, Tooltip } from 'chart.js/auto';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons'
 import '../App.css';
 
-function SummaryBox ({selectedPostcode, treeStats}){
+Chart.register(
+    ArcElement,
+    Tooltip,
+    Legend
+)
+
+function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
 
     const [labels, setLabels] = useState(null);
     const [data, setData] = useState(null)
     const [chartData, setChartData] = useState(null);
     const [chartOptions, setChartOptions] = useState(null);
+
+    const chartRef = useRef();
+
+    const segmentClicked = (event) => {
+
+        const clickedElements = chartRef.current.getElementsAtEventForMode(event, 'point', { intersect: true }, true);
+        
+        if (clickedElements.length > 0) {
+
+            const dataIndex = clickedElements[0].index;
+            const datasetIndex = clickedElements[0].datasetIndex;
+            
+            if (chartData && chartData.labels && chartData.datasets) {
+                
+                const label = chartData.labels[dataIndex];
+
+                highlightTreeOnMap(label)
+
+            } else {
+                console.error('chartData or its properties are undefined.');
+            }
+        }
+    }    
 
     useEffect(() => {
 
@@ -40,13 +71,62 @@ function SummaryBox ({selectedPostcode, treeStats}){
         }
     }, [treeStats]);
 
+    const highlightTreeOnMap = (treeName) => {
+
+        let stringSlice;
+        let layerId;
+    
+        if (selectedPostcode === 0 || !selectedPostcode) {
+            layerId = 'ALL';
+        } else {
+            if (selectedPostcode.length >= 9) {
+                // "D______11 => D11"
+                stringSlice = selectedPostcode.slice(-2);
+            } else {
+                // "D______1 => D1"
+                stringSlice = selectedPostcode.slice(-1);
+            }
+            layerId = `D${stringSlice}`;
+        }
+    
+        if (map && map.current) { 
+            map.current.setFilter(layerId, ['==', ['get', 'species'], treeName]);
+        } else if (map) {  
+            map.setFilter(layerId, ['==', ['get', 'species'], treeName]);
+        } else {
+            console.error("Map object is not available.");
+        }
+    } 
+
+    const resetTreeHighlight = () => {
+
+        let stringSlice;
+    
+        if (selectedPostcode.length >= 9) {
+            stringSlice = selectedPostcode.slice(-2);
+        } else {
+            stringSlice = selectedPostcode.slice(-1);
+        }
+    
+        const layerId = `D${stringSlice}`;
+    
+        if (map && map.current) {  
+            map.current.setFilter(layerId, null);
+        } else if (map) {  
+            map.setFilter(layerId, null);
+        } else {
+            console.error("Map object is not available.");
+        }
+    }
+
     // function used to make the chart options
     const makeChartOptions = () => {
-        const options = {
+        const options = {      
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
                 legend: {
+                    onClick: (e, legendItem) => {}, // Disable the default toggling behavior
                     display: true,  // Display legend for Pie charts
                     position: 'right',
                     labels: {
@@ -106,17 +186,64 @@ function SummaryBox ({selectedPostcode, treeStats}){
         };
     
         return data;
+    } 
+    
+    // Draggable Div
+    const boxRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [offsetX, setOffsetX] = useState(0);
+    const [offsetY, setOffsetY] = useState(0);
+
+    const handleMouseDown = (e) => {
+        const rect = boxRef.current.getBoundingClientRect();
+        setIsDragging(true);
+        setOffsetX(e.clientX - rect.left);
+        setOffsetY(e.clientY - rect.top);
     }
     
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        const x = e.clientX - offsetX;
+        const y = e.clientY - offsetY;
+        boxRef.current.style.left = x + 'px';
+        boxRef.current.style.top = y + 'px';
+    }
+
+    const handleMouseUp = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+    }
+
+    useEffect(() => {
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        }
+    }, [isDragging, offsetX, offsetY]);
+
     return (
-        <div className='floating-summary-box'>
-            <h1 style={{textAlign: 'center', marginBottom: '24px'}}>Trees of {selectedPostcode}</h1>
+        <div ref={boxRef} onMouseDown={handleMouseDown} className='floating-summary-box'>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                <button className="summarybox-back-button" onClick={() => resetMap()}> 
+                    <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
+                </button>
+                <button className='summarybox-back-button' onClick={resetTreeHighlight}>
+                    <FontAwesomeIcon icon={faArrowRotateBack} /> <span style={{marginLeft: '8px'}}>Reset Filter</span>
+                </button>
+            </div>
+            <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>Trees of {selectedPostcode}</h1>
             <div className='chart-holder'>
                 {chartData && chartOptions ? (
                     <Pie 
                         style={{height: '100%'}}
+                        ref={chartRef}
                         data={chartData} 
-                        options={chartOptions}           
+                        options={chartOptions}
+                        onClick={segmentClicked}
                     />
                 ) : (
                     <p>Loading chart...</p>
