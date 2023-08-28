@@ -38,6 +38,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
                 console.log(`Clicked on: ${label} - #: ${value}`);
 
                 highlightTreeOnMap(label)
+
             } else {
                 console.error('chartData or its properties are undefined.');
             }
@@ -75,19 +76,24 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     }, [treeStats]);
 
     const highlightTreeOnMap = (treeName) => {
+
         let stringSlice;
+        let layerId;
     
-        if (selectedPostcode.length >= 9) {
-            // "D______11 => D11"
-            stringSlice = selectedPostcode.slice(-2);
+        if (selectedPostcode === 0 || !selectedPostcode) {
+            layerId = 'ALL';
         } else {
-            // "D______1 => D1"
-            stringSlice = selectedPostcode.slice(-1);
+            if (selectedPostcode.length >= 9) {
+                // "D______11 => D11"
+                stringSlice = selectedPostcode.slice(-2);
+            } else {
+                // "D______1 => D1"
+                stringSlice = selectedPostcode.slice(-1);
+            }
+            layerId = `D${stringSlice}`;
         }
     
-        console.log(stringSlice);
-    
-        const layerId = `D${stringSlice}`;
+        console.log(layerId);
     
         if (map && map.current) { 
             map.current.setFilter(layerId, ['==', ['get', 'species'], treeName]);
@@ -96,7 +102,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
         } else {
             console.error("Map object is not available.");
         }
-    }
+    } 
 
     const resetTreeHighlight = () => {
 

@@ -12,8 +12,8 @@ export default function Navbar({ treeLayers, postcodeLayers, resetMap, setPostCo
     <div className="navbar">
       <div className="navbar-links-wrapper">
       </div>
-      <button onClick={() => {setGlobalLayersVisibility(treeLayers, treesAreVisible); setTreesAreVisible(!treesAreVisible)}}>Show/Hide Trees</button>
-      <button onClick={() => {setPostCodeLayersVisibility(postcodeLayers, postcodesAreVisible); setPostcodesAreVisible(!postcodesAreVisible); console.log(postcodeLayers)}}>Show/Hide Postcodes</button>
+      {/* <button onClick={() => {setGlobalLayersVisibility(treeLayers, treesAreVisible); setTreesAreVisible(!treesAreVisible)}}>Show/Hide Trees</button>
+      <button onClick={() => {setPostCodeLayersVisibility(postcodeLayers, postcodesAreVisible); setPostcodesAreVisible(!postcodesAreVisible); console.log(postcodeLayers)}}>Show/Hide Postcodes</button> */}
 
       {/* <button 
         onClick={() => {

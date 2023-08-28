@@ -91,7 +91,7 @@ function Map() {
     };
 
     // postcodes in Dublin
-    const [postcodes, setPostcodes] = useState(null);
+    const [postcodes, setPostcodes] = useState('');
 
     const [error, setError] = useState(null);
     const retryCount = useRef(0);
@@ -331,10 +331,20 @@ function Map() {
             });
         
             if (isStyleLoaded && treesData.every(item => item.data)) {
-                const allData = [].concat(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D6W);
-                addSourceAndLayer('ALL', allData);
-                console.log('loading in total layer')
-            }
+                const allDataFeatures = [].concat(
+                    D1.features, D2.features, D3.features, D4.features, D5.features, 
+                    D6.features, D7.features, D8.features, D9.features, D10.features, 
+                    D11.features, D12.features, D6W.features
+                );
+            
+                const geojsonAllData = {
+                    type: "FeatureCollection",
+                    features: allDataFeatures
+                };
+            
+                addSourceAndLayer('ALL', geojsonAllData);
+                console.log('loading in total layer');
+            }            
         };
 
         addDataToMap();      
@@ -510,15 +520,23 @@ function Map() {
     };
 
     const setGlobalLayersVisibility = (treeLayers, isVisible) => {
+        
         treeLayers.forEach(treelayer => {
             if (map.current.getLayer(treelayer)) { // Ensure the layer exists before trying to modify it
                 map.current.setLayoutProperty(treelayer, 'visibility', isVisible ? 'visible' : 'none');
             }
         })
+
         setTimeout(() => setIsSummaryBoxShowing(true), 500);
-        
+
+        if (map.current.getSource('ALL')) {
+            const allLayerData = map.current.getSource('ALL')._data;
+            if (allLayerData && allLayerData.features) {
+                const speciesTally = tallySpecies(allLayerData.features);
+                setTreeStats(speciesTally);
+            }
+        }  
     };
-    
 
     // fetch operations
     const fetchTrees = async (url, setTreeData, treeNumber) => {
@@ -600,6 +618,8 @@ function Map() {
             }
 
             const postcodeData = postcodeToData[singlePostcode]
+            
+            console.log(postcodeData);
 
             if (postcodeData){
                 const speciesTally = tallySpecies(postcodeData.features); 
