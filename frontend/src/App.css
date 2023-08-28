@@ -2,6 +2,30 @@ body{
   font-family: 'Inter', sans-serif;
 }
 
+h1 {
+  font-size: 20px;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+p {
+  font-size: 14px;
+}
+
+.map-container{
+  width: calc(100% - 288px);
+  height: 100vh;
+  float: left;
+}
+
+a {
+  text-decoration: none;
+  color: #dfe2e5;
+  font-weight: 800;
+}
+
 .navbar  {
   position: absolute;
   top: 24px;
@@ -65,9 +89,9 @@ body{
 }
 
 /* Customise our pop up without having to add a class */
-.mapboxgl-popup-content  {
-  background-color: rgba(18, 19, 22, 0.8) !important;
-  color: white;
+.mapboxgl-popup-content {
+  background-color: rgba(42, 42, 42, 1) !important;
+  color:  #dfe2e5;
   font-weight: 500;
   border-radius: 5px;
   white-space: nowrap;
@@ -92,7 +116,7 @@ body{
   position: absolute;
   z-index: 100;
   width: 480px;
-  height: 400px;
+  min-height: fit-content;
   top: 100px;
   left: 72px;
   backdrop-filter: blur(16px) saturate(180%);
@@ -112,7 +136,9 @@ body{
 }
 
 .chart-holder{
+  cursor: pointer;
   height: 100%;
+  min-height: 400px;
   width: 100%;
 }
 
@@ -120,30 +146,89 @@ body{
   display: none;
 }
 
-.summarybox-back-button {
+.summarybox-tertiary-button {
   margin-bottom: 12px;
   width: auto;
   color: white;
   text-align: left;
   padding-left: 12px;
+  padding-right: 12px;
   font-weight: 800;
   background-color: rgba(18, 19, 22, 0);
   height: 28px;
-  border-radius: 2px;
+  border-radius: 5px;
   border: none;
   cursor: pointer;
 }
 
-.summarybox-reset-button {
-  margin-bottom: 12px;
-  width: auto;
-  color: white;
-  text-align: left;
-  padding-left: 12px;
-  font-weight: 800;
-  background-color: rgba(18, 19, 22, 0);
+.summarybox-tertiary-button:hover{
+  background-color: rgba(255, 255, 255, 0.1); /* Slight white background on hover */
+}
+
+.summarybox-tertiary-button:active{
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3); /* White outline on focus */
+}
+
+.sidebar{
+  height: 100%;
+  max-width: 240px;
+  z-index: 999;
+  right: 0;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  color: #dfe2e5;
+  padding: 0 24px;
+  align-items: center;
+  background-color: #2a2a2a  ;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background-color: #232020;
+  justify-content: space-between;  /* this will push child elements apart */
+}
+
+.sidebar-container-div{
+  margin-top: 48px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.social-links {
+  margin-bottom: 36px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.icon-holder {
+  width: 60px;
   height: 28px;
-  border-radius: 2px;
-  border: none;
-  cursor: pointer;
+  text-align: center;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.icon-holder:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.icon-holder:active {
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+@media screen and (max-width: 900px) {
+  .sidebar {
+      display: none;
+  }
+  .map-container {
+      width: 100vw;
+  }
 }

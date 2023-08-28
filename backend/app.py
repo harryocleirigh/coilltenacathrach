@@ -52,10 +52,8 @@ def get_all_trees_from_db():
     
     return trees_dict
 
-# now we want to allocate memory for our db effectively. by default the structure is an array but there are too many records for it to be quick
 all_trees = get_all_trees_from_db()
 
-# Define a single route that accepts a part number as a parameter
 @app.route('/trees/<int:part_number>', methods=['GET'])
 def getTreesPart(part_number):
     conn = sqlite3.connect('trees.db')
