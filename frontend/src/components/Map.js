@@ -618,8 +618,6 @@ function Map() {
             }
 
             const postcodeData = postcodeToData[singlePostcode]
-            
-            console.log(postcodeData);
 
             if (postcodeData){
                 const speciesTally = tallySpecies(postcodeData.features); 
@@ -630,8 +628,6 @@ function Map() {
     }, [selectedPostcode])
 
     const resetMap = () => {
-
-        console.log('click')
 
         isClicked.current = false;
 

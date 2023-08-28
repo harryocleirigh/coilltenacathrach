@@ -23,19 +23,15 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     const segmentClicked = (event) => {
 
         const clickedElements = chartRef.current.getElementsAtEventForMode(event, 'point', { intersect: true }, true);
-    
-        console.log('Clicked elements:', clickedElements);
-    
+        
         if (clickedElements.length > 0) {
 
             const dataIndex = clickedElements[0].index;
             const datasetIndex = clickedElements[0].datasetIndex;
             
             if (chartData && chartData.labels && chartData.datasets) {
+                
                 const label = chartData.labels[dataIndex];
-                const value = chartData.datasets[datasetIndex].data[dataIndex];
-    
-                console.log(`Clicked on: ${label} - #: ${value}`);
 
                 highlightTreeOnMap(label)
 
@@ -93,8 +89,6 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             layerId = `D${stringSlice}`;
         }
     
-        console.log(layerId);
-    
         if (map && map.current) { 
             map.current.setFilter(layerId, ['==', ['get', 'species'], treeName]);
         } else if (map) {  
@@ -113,8 +107,6 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
         } else {
             stringSlice = selectedPostcode.slice(-1);
         }
-    
-        console.log(stringSlice);
     
         const layerId = `D${stringSlice}`;
     
