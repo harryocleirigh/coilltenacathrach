@@ -31,16 +31,29 @@ def load_csv(file_path):
         print(f"An error occurred during startup: {e}")
         return None
     
-def get_all_trees():
-    with open('data/all_trees.json', 'r') as f:
-        data = json.load(f)
-    return data
+def get_all_trees_from_db():
+
+    conn = sqlite3.connect('trees.db')
+    c = conn.cursor()
+    
+
+    tables = ["Dublin_1", "Dublin_2", "Dublin_3", "Dublin_4", "Dublin_5", "Dublin_6", "Dublin_7", "Dublin_8", "Dublin_9", "Dublin_10", "Dublin_11", "Dublin_12", "Dublin_6W"]
+    query = " UNION ALL ".join(f"SELECT id, POINT_X, POINT_Y, species FROM {table}" for table in tables)
+    
+    c.execute(query)
+
+    trees = c.fetchall()
+
+    trees_dict = {tree[0]: tree for tree in trees}
+    
+    conn.close()
+
+    print('Read successfully')
+    
+    return trees_dict
 
 # now we want to allocate memory for our db effectively. by default the structure is an array but there are too many records for it to be quick
-all_trees = get_all_trees()
-
-# therefore we are going to convert the array into a 2d dictionary
-all_trees = {tree['id']: tree for tree in all_trees}
+all_trees = get_all_trees_from_db()
 
 # Define a single route that accepts a part number as a parameter
 @app.route('/trees/<int:part_number>', methods=['GET'])
