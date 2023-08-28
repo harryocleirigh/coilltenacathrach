@@ -126,7 +126,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             responsive: true,
             plugins: {
                 legend: {
-                    onClick: (e, legendItem) => {}, // Disable the default toggling behavior
+                    onClick: (e, legendItem) => {},
                     display: true,  // Display legend for Pie charts
                     position: 'right',
                     labels: {
@@ -224,8 +224,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     
         boxRef.current.style.left = x + 'px';
         boxRef.current.style.top = y + 'px';
-    };
-    
+    };    
     
     const handleMouseUp = (e) => {
         e.preventDefault();

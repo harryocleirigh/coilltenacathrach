@@ -17,7 +17,7 @@ function Sidebar () {
             </div>
 
             <div className='social-wrapper'>
-                <h4>Want to get in touch? 👇</h4>
+                <h2>Get in touch! 👇</h2>
                 <div className="social-links">
                     <a href='https://github.com/harryocleirigh' target="_blank">
                         <div className='icon-holder'>        
