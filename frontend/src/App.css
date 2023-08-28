@@ -16,13 +16,13 @@ body{
 }
 
 .transparent-button  {
-  background-color: green;
   height: 40px;
   width: 150px;
   color: white;
   border: none;
   padding: 0;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 .navbar-links  {
@@ -93,7 +93,7 @@ body{
   z-index: 100;
   width: 480px;
   height: 400px;
-  margin-top: 100px;
+  top: 100px;
   left: 72px;
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -104,13 +104,46 @@ body{
   padding: 24px 18px;
   display: flex;
   flex-direction: column;
+  cursor: grab;
+}
+
+.floating-summary-box:active {
+  cursor: grabbing;
 }
 
 .chart-holder{
-  height: 70%;
+  height: 100%;
   width: 100%;
 }
 
 .mapboxgl-control-container{
   display: none;
+}
+
+.summarybox-back-button {
+  margin-bottom: 12px;
+  width: auto;
+  color: white;
+  text-align: left;
+  padding-left: 12px;
+  font-weight: 800;
+  background-color: rgba(18, 19, 22, 0);
+  height: 28px;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
+}
+
+.summarybox-reset-button {
+  margin-bottom: 12px;
+  width: auto;
+  color: white;
+  text-align: left;
+  padding-left: 12px;
+  font-weight: 800;
+  background-color: rgba(18, 19, 22, 0);
+  height: 28px;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
 }

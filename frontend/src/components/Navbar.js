@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import '../App.css';
+import { isVisible } from '@testing-library/user-event/dist/utils';
 
-export default function Navbar({ treeLayers, postcodeLayers, resetMap, setPostCodeLayersVisibility }) {
+export default function Navbar({ treeLayers, postcodeLayers, resetMap, setPostCodeLayersVisibility, setGlobalLayersVisibility }) {
 
   const [treesAreVisible, setTreesAreVisible] = useState(true);
   const [postcodesAreVisible, setPostcodesAreVisible] = useState(false);
@@ -10,10 +11,24 @@ export default function Navbar({ treeLayers, postcodeLayers, resetMap, setPostCo
     
     <div className="navbar">
       <div className="navbar-links-wrapper">
-      <button className="transparent-button" onClick={() => resetMap()}> Reset Map</button>
       </div>
-      {/* <button onClick={() => {setLayersVisibility(treeLayers, treesAreVisible); setTreesAreVisible(!treesAreVisible)}}>Show/Hide Trees</button> */}
+      <button onClick={() => {setGlobalLayersVisibility(treeLayers, treesAreVisible); setTreesAreVisible(!treesAreVisible)}}>Show/Hide Trees</button>
       <button onClick={() => {setPostCodeLayersVisibility(postcodeLayers, postcodesAreVisible); setPostcodesAreVisible(!postcodesAreVisible); console.log(postcodeLayers)}}>Show/Hide Postcodes</button>
+
+      {/* <button 
+        onClick={() => {
+          if (postcodesAreVisible) { 
+            console.log('is vis')
+            setPostCodeLayersVisibility(postcodeLayers, postcodesAreVisible);
+            setPostcodesAreVisible(!postcodesAreVisible);
+          } else {
+            console.log('not vis')
+            setGlobalLayersVisibility(postcodesAreVisible);
+            setPostcodesAreVisible(!postcodesAreVisible);
+          }
+          }}>
+        Show/Hide Postcodes
+      </button> */}
     </div>
   );
 } 

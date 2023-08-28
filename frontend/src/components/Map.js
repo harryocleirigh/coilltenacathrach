@@ -8,7 +8,6 @@ import { feature } from '@turf/helpers';
 
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
-import { click } from '@testing-library/user-event/dist/click';
 
 function Map() {
 
@@ -301,7 +300,7 @@ function Map() {
                         ['linear'],
                         ['zoom'],
                         14, 2,  // At zoom level 14 or less, radius is 2
-                        14.01, 4 // At zoom level 14.01 or more, radius is 4
+                        14.01, 3 // At zoom level 14.01 or more, radius is 4
                     ],
                 }
             }, 'settlement-subdivision-label');
@@ -450,8 +449,10 @@ function Map() {
 
             let singlePostcode;
             if (layerId.length >= 9){
+                // "D______11 => D11"
                 singlePostcode = layerId.slice(-2)
             } else {
+                // "D______5 => D5"
                 singlePostcode = layerId.slice(-1)
             }
 
@@ -507,6 +508,17 @@ function Map() {
             map.current.setLayoutProperty(layerId+'-line', 'visibility', isVisible ? 'visible' : 'none');
         });
     };
+
+    const setGlobalLayersVisibility = (treeLayers, isVisible) => {
+        treeLayers.forEach(treelayer => {
+            if (map.current.getLayer(treelayer)) { // Ensure the layer exists before trying to modify it
+                map.current.setLayoutProperty(treelayer, 'visibility', isVisible ? 'visible' : 'none');
+            }
+        })
+        setTimeout(() => setIsSummaryBoxShowing(true), 500);
+        
+    };
+    
 
     // fetch operations
     const fetchTrees = async (url, setTreeData, treeNumber) => {
@@ -634,6 +646,7 @@ function Map() {
                     map={map}
                     selectedPostcode={selectedPostcode}
                     treeStats={treeStats}
+                    resetMap={resetMap}
                 />
                 ) : <></>}
 
@@ -642,7 +655,7 @@ function Map() {
                 postcodeLayers={postcodeLayers}
                 postcodeLineLayers={postcodeLineLayers}
                 setPostCodeLayersVisibility={setPostCodeLayersVisibility}
-                resetMap={resetMap}
+                setGlobalLayersVisibility={setGlobalLayersVisibility}
             />
         </div>
 

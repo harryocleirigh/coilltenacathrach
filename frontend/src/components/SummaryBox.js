@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Pie, getElementsAtEvent } from 'react-chartjs-2';
 import Chart, { ArcElement, Legend, Tooltip } from 'chart.js/auto';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons'
 import '../App.css';
 
 Chart.register(
@@ -9,7 +11,7 @@ Chart.register(
     Legend
 )
 
-function SummaryBox ({selectedPostcode, treeStats, map}){
+function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
 
     const [labels, setLabels] = useState(null);
     const [data, setData] = useState(null)
@@ -76,8 +78,10 @@ function SummaryBox ({selectedPostcode, treeStats, map}){
         let stringSlice;
     
         if (selectedPostcode.length >= 9) {
+            // "D______11 => D11"
             stringSlice = selectedPostcode.slice(-2);
         } else {
+            // "D______1 => D1"
             stringSlice = selectedPostcode.slice(-1);
         }
     
@@ -184,19 +188,57 @@ function SummaryBox ({selectedPostcode, treeStats, map}){
         };
     
         return data;
+    } 
+    
+    // Draggable Div
+    const boxRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [offsetX, setOffsetX] = useState(0);
+    const [offsetY, setOffsetY] = useState(0);
+
+    const handleMouseDown = (e) => {
+        const rect = boxRef.current.getBoundingClientRect();
+        setIsDragging(true);
+        setOffsetX(e.clientX - rect.left);
+        setOffsetY(e.clientY - rect.top);
+    }
+    
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        const x = e.clientX - offsetX;
+        const y = e.clientY - offsetY;
+        boxRef.current.style.left = x + 'px';
+        boxRef.current.style.top = y + 'px';
+    }
+
+    const handleMouseUp = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
     }
 
     useEffect(() => {
-        
-        console.log(treeStats);
 
-    }, [treeStats]);    
-    
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        }
+    }, [isDragging, offsetX, offsetY]);
+
     return (
-        <div className='floating-summary-box'>
-            <h1 style={{textAlign: 'center', marginBottom: '30px'}}>Trees of {selectedPostcode}</h1>
+        <div ref={boxRef} onMouseDown={handleMouseDown} className='floating-summary-box'>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                <button className="summarybox-back-button" onClick={() => resetMap()}> 
+                    <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
+                </button>
+                <button className='summarybox-back-button' onClick={resetTreeHighlight}>
+                    <FontAwesomeIcon icon={faArrowRotateBack} /> <span style={{marginLeft: '8px'}}>Reset Filter</span>
+                </button>
+            </div>
+            <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>Trees of {selectedPostcode}</h1>
             <div className='chart-holder'>
-                <button onClick={resetTreeHighlight}> Reset Filter</button>
                 {chartData && chartOptions ? (
                     <Pie 
                         style={{height: '100%'}}
