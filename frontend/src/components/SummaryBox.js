@@ -50,7 +50,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             // Sort the treeStats by value in descending order
             const sortedTreeStatsArray = Object.entries(treeStats)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 12);
+                .slice(0, 16);
 
             // Convert the sorted array back to an object
             const topTreeStats = Object.fromEntries(sortedTreeStatsArray);
@@ -130,6 +130,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
                     display: true,  // Display legend for Pie charts
                     position: 'right',
                     labels: {
+                        padding: 12,
                         color: 'white',
                         font: {
                             size: 12,
@@ -203,12 +204,29 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     
     const handleMouseMove = (e) => {
         if (!isDragging) return;
-        const x = e.clientX - offsetX;
-        const y = e.clientY - offsetY;
+    
+        const containerRect = document.querySelector('.map-container').getBoundingClientRect();
+        const navbarRect = document.querySelector('.navbar').getBoundingClientRect();
+    
+        let x = e.clientX - offsetX;
+        let y = e.clientY - offsetY;
+    
+        const maxX = containerRect.left + containerRect.width - boxRef.current.clientWidth;
+        const maxY = containerRect.top + containerRect.height - boxRef.current.clientHeight;
+    
+        // Ensure the box doesn't go above the bottom of the navbar
+        const minY = navbarRect.bottom;
+    
+        if (x < containerRect.left) x = containerRect.left;
+        if (y < minY) y = minY; // Use minY instead of containerRect.top
+        if (x > maxX) x = maxX;
+        if (y > maxY) y = maxY;
+    
         boxRef.current.style.left = x + 'px';
         boxRef.current.style.top = y + 'px';
-    }
-
+    };
+    
+    
     const handleMouseUp = (e) => {
         e.preventDefault();
         setIsDragging(false);
@@ -228,10 +246,10 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     return (
         <div ref={boxRef} onMouseDown={handleMouseDown} className='floating-summary-box'>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                <button className="summarybox-back-button" onClick={() => resetMap()}> 
+                <button className="summarybox-tertiary-button" onClick={() => resetMap()}> 
                     <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
                 </button>
-                <button className='summarybox-back-button' onClick={resetTreeHighlight}>
+                <button className='summarybox-tertiary-button' onClick={resetTreeHighlight}>
                     <FontAwesomeIcon icon={faArrowRotateBack} /> <span style={{marginLeft: '8px'}}>Reset Filter</span>
                 </button>
             </div>

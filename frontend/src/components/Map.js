@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Navbar from './Navbar';
@@ -8,6 +8,8 @@ import { feature } from '@turf/helpers';
 
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
+import Sidebar from './Sidebar';
+import { createBins } from '@turf/turf';
 
 function Map() {
 
@@ -28,6 +30,7 @@ function Map() {
     // Use States and Refs
     const [singleTreeData, setSingleTreeData] = useState(null);
     const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+    const [isAllDataLoaded, setIsAllDataLoaded] = useState(false);
     const isClicked = useRef(false);
 
     const [isSummaryBoxShowing, setIsSummaryBoxShowing] = useState(false);
@@ -89,6 +92,22 @@ function Map() {
         "12": D12,
         "6W": D6W
     };
+
+    const settersToData = {
+        "1": setD1,
+        "2": setD2,
+        "3": setD3,
+        "4": setD4,
+        "5": setD5,
+        "6": setD6,
+        "7": setD7,
+        "8": setD8,
+        "9": setD9,
+        "10": setD10,
+        "11": setD11,
+        "12": setD12,
+        "6W": setD6W
+    }
 
     // postcodes in Dublin
     const [postcodes, setPostcodes] = useState('');
@@ -180,8 +199,8 @@ function Map() {
                     data: neighbourhood
                     },
                     paint: {  
-                    'line-color': '#b6d7a8',
-                    'line-width': 1,
+                    'line-color': '#86a678',
+                    'line-width': 2,
                     'line-width-transition': { duration: 600 }, // .6 second transition
                     }
                 });
@@ -219,6 +238,7 @@ function Map() {
 
     // Init map
     useEffect(() => {
+
         if (!map.current) {
             // swap out access token
             mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
@@ -235,19 +255,24 @@ function Map() {
 
             map.current.on('load', () => {
                 add3DBuildings(map.current);
-                fetchTrees(`${BASE_API_URL}/trees/1`, setD1, 1);
-                fetchTrees(`${BASE_API_URL}/trees/2`, setD2, 2);
-                fetchTrees(`${BASE_API_URL}/trees/3`, setD3, 3);
-                fetchTrees(`${BASE_API_URL}/trees/4`, setD4, 4);
-                fetchTrees(`${BASE_API_URL}/trees/5`, setD5, 5);
-                fetchTrees(`${BASE_API_URL}/trees/6`, setD6, 6);
-                fetchTrees(`${BASE_API_URL}/trees/7`, setD7, 7);
-                fetchTrees(`${BASE_API_URL}/trees/8`, setD8, 8);
-                fetchTrees(`${BASE_API_URL}/trees/9`, setD9, 9);
-                fetchTrees(`${BASE_API_URL}/trees/10`, setD10, 10);
-                fetchTrees(`${BASE_API_URL}/trees/11`, setD11, 11);
-                fetchTrees(`${BASE_API_URL}/trees/12`, setD12, 12);
-                fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13);
+                Promise.all([
+                    fetchTrees(`${BASE_API_URL}/trees/1`, setD1, 1),
+                    fetchTrees(`${BASE_API_URL}/trees/2`, setD2, 2),
+                    fetchTrees(`${BASE_API_URL}/trees/3`, setD3, 3),
+                    fetchTrees(`${BASE_API_URL}/trees/4`, setD4, 4),
+                    fetchTrees(`${BASE_API_URL}/trees/5`, setD5, 5),
+                    fetchTrees(`${BASE_API_URL}/trees/6`, setD6, 6),
+                    fetchTrees(`${BASE_API_URL}/trees/7`, setD7, 7),
+                    fetchTrees(`${BASE_API_URL}/trees/8`, setD8, 8),
+                    fetchTrees(`${BASE_API_URL}/trees/9`, setD9, 9),
+                    fetchTrees(`${BASE_API_URL}/trees/10`, setD10, 10),
+                    fetchTrees(`${BASE_API_URL}/trees/11`, setD11, 11),
+                    fetchTrees(`${BASE_API_URL}/trees/12`, setD12, 12),
+                    fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13),
+                ]).then(() => {
+                    setIsAllDataLoaded(true)
+                    console.log('all data loaded');
+                })
             });
         }
     }, []); // Empty dependency
@@ -343,7 +368,6 @@ function Map() {
                 };
             
                 addSourceAndLayer('ALL', geojsonAllData);
-                console.log('loading in total layer');
             }            
         };
 
@@ -402,12 +426,14 @@ function Map() {
             const lineLayerId = `${layerId}-line`;
 
             map.getCanvas().style.cursor = '';
-            map.setPaintProperty(layerId, 'fill-opacity', 0.5);
+            map.setPaintProperty(layerId, 'fill-opacity', 0.4);
             map.setPaintProperty(lineLayerId, 'line-width', 1);
         }
     };
 
-    const handleClickPostcode = (postcode, map, e) => {
+    const handleClickPostcode = async (postcode, map, e) => {
+
+        console.log(postcode, e);
 
         if (isClicked.current){
 
@@ -454,8 +480,9 @@ function Map() {
 
             const layerId = postcode.properties.postcodes;
             const lineLayerId = `${layerId}-line`;
-            map.setPaintProperty(layerId, 'fill-opacity', 0.3);
+            map.setPaintProperty(layerId, 'fill-opacity', 0.4);
             map.setPaintProperty(lineLayerId, 'line-width', 3);
+            map.setPaintProperty(layerId+'-text', 'text-color', '#f5f5f5' )
 
             let singlePostcode;
             if (layerId.length >= 9){
@@ -510,7 +537,7 @@ function Map() {
     const setPostCodeLayersVisibility = (layerIds, isVisible) => {
         layerIds.forEach(layerId => {
             if (map.current.getLayer(layerId)) {
-                map.current.setPaintProperty(layerId, 'fill-opacity', 0.5)
+                map.current.setPaintProperty(layerId, 'fill-opacity', 0.4)
                 map.current.setPaintProperty(layerId+'-line', 'line-width', 1)
                 isClicked.current = false;
             }
@@ -543,6 +570,7 @@ function Map() {
         try {
             const response = await fetch(url);
             if (!response.ok) {
+                console.log(response)
                 const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;
                 throw new Error(message);
             }
@@ -576,7 +604,7 @@ function Map() {
             }
     
             // Create the popup after data has been fetched and set
-            popup.current.setLngLat(tree.geometry.coordinates).setHTML(`<p>${data.Species_Co}</p>`).addTo(map.current);
+            popup.current.setLngLat(tree.geometry.coordinates).setHTML(`<p>${data[3]}</p>`).addTo(map.current);
             
         } catch (error) {
             console.error('Error fetching data for a single tree', error);
@@ -637,8 +665,9 @@ function Map() {
         })
 
         postcodeLayers.forEach(layer => {
-            map.current.setPaintProperty(layer, 'fill-opacity', 0.5)
+            map.current.setPaintProperty(layer, 'fill-opacity', 0.4)
             map.current.setPaintProperty(layer+'-line', 'line-width', 1)
+            map.current.setPaintProperty(layer+'-text', 'text-color', '#B1FFB1')
         })
 
         map.current.flyTo({ center: [originalLNG, originalLAT], zoom: 11, essential: true })
@@ -653,9 +682,12 @@ function Map() {
     }
 
     return  (
-        <div>
         
-            <div ref={mapContainer} style={{ width: '100%', height: '100vh' }}> 
+        <div style={{ position: 'relative', height: '100vh' }}>
+
+            <Sidebar />
+        
+            <div ref={mapContainer} className='map-container'>
 
             {isSummaryBoxShowing ? (
                 <SummaryBox
