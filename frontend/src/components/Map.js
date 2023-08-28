@@ -91,6 +91,22 @@ function Map() {
         "6W": D6W
     };
 
+    const settersToData = {
+        "1": setD1,
+        "2": setD2,
+        "3": setD3,
+        "4": setD4,
+        "5": setD5,
+        "6": setD6,
+        "7": setD7,
+        "8": setD8,
+        "9": setD9,
+        "10": setD10,
+        "11": setD11,
+        "12": setD12,
+        "6W": setD6W
+    }
+
     // postcodes in Dublin
     const [postcodes, setPostcodes] = useState('');
 
@@ -220,6 +236,9 @@ function Map() {
 
     // Init map
     useEffect(() => {
+
+        const startTime = performance.now();
+
         if (!map.current) {
             // swap out access token
             mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
@@ -236,19 +255,25 @@ function Map() {
 
             map.current.on('load', () => {
                 add3DBuildings(map.current);
-                fetchTrees(`${BASE_API_URL}/trees/1`, setD1, 1);
-                fetchTrees(`${BASE_API_URL}/trees/2`, setD2, 2);
-                fetchTrees(`${BASE_API_URL}/trees/3`, setD3, 3);
-                fetchTrees(`${BASE_API_URL}/trees/4`, setD4, 4);
-                fetchTrees(`${BASE_API_URL}/trees/5`, setD5, 5);
-                fetchTrees(`${BASE_API_URL}/trees/6`, setD6, 6);
-                fetchTrees(`${BASE_API_URL}/trees/7`, setD7, 7);
-                fetchTrees(`${BASE_API_URL}/trees/8`, setD8, 8);
-                fetchTrees(`${BASE_API_URL}/trees/9`, setD9, 9);
-                fetchTrees(`${BASE_API_URL}/trees/10`, setD10, 10);
-                fetchTrees(`${BASE_API_URL}/trees/11`, setD11, 11);
-                fetchTrees(`${BASE_API_URL}/trees/12`, setD12, 12);
-                fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13);
+                Promise.all([
+                    fetchTrees(`${BASE_API_URL}/trees/1`, setD1, 1),
+                    fetchTrees(`${BASE_API_URL}/trees/2`, setD2, 2),
+                    fetchTrees(`${BASE_API_URL}/trees/3`, setD3, 3),
+                    fetchTrees(`${BASE_API_URL}/trees/4`, setD4, 4),
+                    fetchTrees(`${BASE_API_URL}/trees/5`, setD5, 5),
+                    fetchTrees(`${BASE_API_URL}/trees/6`, setD6, 6),
+                    fetchTrees(`${BASE_API_URL}/trees/7`, setD7, 7),
+                    fetchTrees(`${BASE_API_URL}/trees/8`, setD8, 8),
+                    fetchTrees(`${BASE_API_URL}/trees/9`, setD9, 9),
+                    fetchTrees(`${BASE_API_URL}/trees/10`, setD10, 10),
+                    fetchTrees(`${BASE_API_URL}/trees/11`, setD11, 11),
+                    fetchTrees(`${BASE_API_URL}/trees/12`, setD12, 12),
+                    fetchTrees(`${BASE_API_URL}/trees/13`, setD6W, 13),
+                ]).then(() => {
+                    const endTime = performance.now();
+                    const duration = endTime - startTime;
+                    console.log(`Time taken to fetch all 13 chunks: ${duration} milliseconds`);
+                })
             });
         }
     }, []); // Empty dependency
@@ -408,7 +433,9 @@ function Map() {
         }
     };
 
-    const handleClickPostcode = (postcode, map, e) => {
+    const handleClickPostcode = async (postcode, map, e) => {
+
+        console.log(postcode, e);
 
         if (isClicked.current){
 
@@ -545,6 +572,7 @@ function Map() {
         try {
             const response = await fetch(url);
             if (!response.ok) {
+                console.log(response)
                 const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;
                 throw new Error(message);
             }
