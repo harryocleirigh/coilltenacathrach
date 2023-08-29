@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Pie } from 'react-chartjs-2';
 import Chart, { ArcElement, Legend, Tooltip } from 'chart.js/auto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faArrowRotateBack, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import '../App.css';
 
 Chart.register(
@@ -11,7 +11,7 @@ Chart.register(
     Legend
 )
 
-function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
+function SummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBoxShowing}){
 
     const [labels, setLabels] = useState(null);
     const [data, setData] = useState(null)
@@ -295,6 +295,9 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
                 {selectedPostcode ? <button className="summarybox-tertiary-button" onClick={() => resetMap()}> 
                     <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
                 </button> : null}
+                <button className='summarybox-tertiary-button' onClick={() => {setIsSummaryBoxShowing(false);}}>
+                    <FontAwesomeIcon icon={faEyeSlash} /> <span style={{marginLeft: '8px'}}>Hide Window</span>
+                </button>
             </div>
             <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>{selectedPostcode ? `Trees of ${selectedPostcode}` : "Trees of Dublin"}</h1>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>

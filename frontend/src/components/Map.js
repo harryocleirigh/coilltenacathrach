@@ -13,6 +13,7 @@ import SummaryBox from './SummaryBox'
 
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 function Map() {
 
@@ -36,6 +37,7 @@ function Map() {
     const isClicked = useRef(false);
 
     const [isSummaryBoxShowing, setIsSummaryBoxShowing] = useState(false);
+    const [isSummaryBoxAvailable, setIsSummaryBoxAvailable] = useState(false);
     const [selectedPostcode, setSelectedPostcode] = useState(null);
 
     const [treeStats, setTreeStats] = useState(null);
@@ -496,6 +498,8 @@ function Map() {
 
             setIsSummaryBoxShowing(true);
 
+            setIsSummaryBoxAvailable(true);
+
         }
 
     };
@@ -645,6 +649,7 @@ function Map() {
 
         if (isSummaryBoxShowing){
             setIsSummaryBoxShowing(false);
+            setIsSummaryBoxAvailable(false);
         }
     }
 
@@ -662,6 +667,9 @@ function Map() {
                     selectedPostcode={selectedPostcode}
                     treeStats={treeStats}
                     resetMap={resetMap}
+                    setIsSummaryBoxShowing={setIsSummaryBoxShowing}
+                    isSummaryBoxShowing={isSummaryBoxShowing}
+                    setIsSummaryBoxAvailable={setIsSummaryBoxAvailable}
                 />
                 ) : <></>}
 
@@ -673,6 +681,9 @@ function Map() {
                 tallySpecies={tallySpecies}
                 setIsSummaryBoxShowing={setIsSummaryBoxShowing}
                 setSelectedPostcode={setSelectedPostcode}
+                isSummaryBoxShowing={isSummaryBoxShowing}
+                isSummaryBoxAvailable={isSummaryBoxAvailable}
+                setIsSummaryBoxAvailable={setIsSummaryBoxAvailable}
             />
         </div>
 
