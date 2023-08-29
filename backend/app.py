@@ -36,7 +36,6 @@ def get_all_trees_from_db():
     conn = sqlite3.connect('trees.db')
     c = conn.cursor()
     
-
     tables = ["Dublin_1", "Dublin_2", "Dublin_3", "Dublin_4", "Dublin_5", "Dublin_6", "Dublin_7", "Dublin_8", "Dublin_9", "Dublin_10", "Dublin_11", "Dublin_12", "Dublin_6W"]
     query = " UNION ALL ".join(f"SELECT id, POINT_X, POINT_Y, species FROM {table}" for table in tables)
     
@@ -44,13 +43,16 @@ def get_all_trees_from_db():
 
     trees = c.fetchall()
 
-    trees_dict = {tree[0]: tree for tree in trees}
+    standardised_names = [(tree[0], tree[1], tree[2], tree[3].title() if tree[3] else None) for tree in trees]
+    
+    trees_dict = {tree[0]: tree for tree in standardised_names}
     
     conn.close()
 
-    print('Read successfully')
+    print('2D Dictionary of all trees created successfully')
     
     return trees_dict
+
 
 all_trees = get_all_trees_from_db()
 
