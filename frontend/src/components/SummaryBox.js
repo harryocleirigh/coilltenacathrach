@@ -17,8 +17,25 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     const [data, setData] = useState(null)
     const [chartData, setChartData] = useState(null);
     const [chartOptions, setChartOptions] = useState(null);
+    const [filteringInProgress, setFilteringInProgress] = useState(false);
 
     const chartRef = useRef();
+
+    const dropDownOptions = 
+        treeStats ? 
+            Object.keys(treeStats).sort().map((key, index) => 
+                <option key={index} value={key}>
+                    {key}
+                </option>
+            )
+            : null;
+
+    const dropdownValueSelected = (value) => {
+
+        const dropdownValue = (value.target.value)
+        highlightTreeOnMap(dropdownValue)
+
+    }
 
     const segmentClicked = (event) => {
 
@@ -98,18 +115,19 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
 
     const resetTreeHighlight = () => {
 
-        if(!selectedPostcode){
-            map.current.setFilter('ALL', null)
-        } else {
-
-            let stringSlice;
+        setFilteringInProgress(true);  // Start the animation
     
+        if(!selectedPostcode){
+            map.current.setFilter('ALL', null);
+            // Don't setFilteringInProgress to false here; let the 'idle' event handle it.
+        } else {
+            let stringSlice;
             if (selectedPostcode.length >= 9) {
                 stringSlice = selectedPostcode.slice(-2);
             } else {
                 stringSlice = selectedPostcode.slice(-1);
             }
-        
+    
             const layerId = `D${stringSlice}`;
         
             if (map && map.current) {  
@@ -119,9 +137,29 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             } else {
                 console.error("Map object is not available.");
             }
-
+            // Don't setFilteringInProgress to false here; let the 'idle' event handle it.
         }
     }
+    
+    // animation timer to indicate to user that the filtering is occuring
+    useEffect(() => {
+        const handleMapIdle = () => {
+            setFilteringInProgress(false);  // End the animation
+        };
+    
+        // Attach the event listener
+        if (map && map.current) {
+            map.current.on('idle', handleMapIdle);
+        }
+    
+        // Clean up the event listener on component unmount
+        return () => {
+            if (map && map.current) {
+                map.current.off('idle', handleMapIdle);
+            }
+        };
+    }, [map]);  // This useEffect runs when the map object changes
+    
 
     // function used to make the chart options
     const makeChartOptions = () => {
@@ -254,11 +292,19 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
                 {selectedPostcode ? <button className="summarybox-tertiary-button" onClick={() => resetMap()}> 
                     <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
                 </button> : null}
-                <button className='summarybox-tertiary-button' onClick={resetTreeHighlight}>
-                    <FontAwesomeIcon icon={faArrowRotateBack} /> <span style={{marginLeft: '8px'}}>Reset Filter</span>
-                </button>
             </div>
             <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>{selectedPostcode ? `Trees of ${selectedPostcode}` : "All trees of Dublin"}</h1>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                <select className='summarybox-dropdown' onChange={dropdownValueSelected}>
+                    <option value="" disabled selected>Filter by tree</option>
+                    {dropDownOptions}
+                </select>
+                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <button className='summarybox-tertiary-button' onClick={resetTreeHighlight}>
+                        <FontAwesomeIcon className={filteringInProgress ? "rotating" : ""} icon={faArrowRotateBack} /> <span style={{marginLeft: '8px'}}>Reset Filter</span>
+                    </button>
+                </div>
+            </div>
             <div className='chart-holder'>
                 {chartData && chartOptions ? (
                     <Pie 

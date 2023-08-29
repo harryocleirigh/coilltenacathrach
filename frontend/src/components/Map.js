@@ -506,7 +506,6 @@ function Map() {
 
     const handleMouseOverTree = () => {
         map.current.on('mousemove', (e) => {
-            console.log(e);
             const existingLayers = getExistingLayers();
             const features = map.current.queryRenderedFeatures(e.point, { layers: existingLayers });
             if (features.length > 0) {
@@ -668,6 +667,7 @@ function Map() {
 
             <Navbar 
                 map={map}
+                treeLayers={treeLayers}
                 postcodeLayers={postcodeLayers}
                 setTreeStats={setTreeStats}
                 tallySpecies={tallySpecies}

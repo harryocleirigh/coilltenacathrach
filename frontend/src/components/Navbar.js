@@ -3,7 +3,7 @@ import '../App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTreeCity } from '@fortawesome/free-solid-svg-icons'
 
-export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBoxShowing, setSelectedPostcode, postcodeLayers}) {
+export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBoxShowing, setSelectedPostcode, postcodeLayers, treeLayers}) {
 
   const [areAllTreesShowing, setAreAllTreesShowing] = useState(false)
 
@@ -15,12 +15,14 @@ export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBo
           icon={faTreeCity} 
           onClick={() => window.location.reload()} 
           style={{height: '100%', width: '36px', cursor: 'pointer'}}/>
-          <h1>Trees of Dublin</h1>
+          <h1 className='h1-sidebar-heading'>Trees of Dublin</h1>
       </div>
       <button 
         className='transparent-button'
         onClick={() => {
           if (!areAllTreesShowing) {
+
+            map.current.flyTo({ center: [-6.260259, 53.349811], zoom: 11, essential: true });
 
             map.current.setLayoutProperty('ALL', 'visibility', 'visible');
 
