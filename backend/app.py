@@ -69,6 +69,10 @@ def getTreesPart(part_number):
     conn.close()
 
     df = pd.DataFrame(data, columns=columns)
+
+     # Standardise species names
+    df['species'] = df['species'].str.title()
+
     gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.POINT_X, df.POINT_Y))
     geojson = gdf.to_json()
 
