@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTreeCity } from '@fortawesome/free-solid-svg-icons'
+import { faTreeCity, faTree } from '@fortawesome/free-solid-svg-icons'
 
 export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBoxShowing, setSelectedPostcode, postcodeLayers, treeLayers}) {
 
@@ -59,7 +59,17 @@ export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBo
           }
         }}  
       >
-        {areAllTreesShowing ? "Show postcodes" : "Show all trees" }
+      {areAllTreesShowing ? (
+              <>
+                  <FontAwesomeIcon icon={faTreeCity} />
+                  <span style={{marginLeft: '12px'}}>Show postcodes</span>
+              </>
+          ) : (
+              <>
+                  <FontAwesomeIcon icon={faTree} />
+                  <span style={{marginLeft: '12px'}}>Show all trees</span>
+              </>
+          )}
       </button>
     </div>
   );
