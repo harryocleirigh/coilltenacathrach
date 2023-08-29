@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Pie, getElementsAtEvent } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
 import Chart, { ArcElement, Legend, Tooltip } from 'chart.js/auto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons'
@@ -44,8 +44,6 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     useEffect(() => {
 
         if (treeStats) {
-
-            console.log(treeStats);
 
             // Sort the treeStats by value in descending order
             const sortedTreeStatsArray = Object.entries(treeStats)
@@ -100,22 +98,28 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
 
     const resetTreeHighlight = () => {
 
-        let stringSlice;
-    
-        if (selectedPostcode.length >= 9) {
-            stringSlice = selectedPostcode.slice(-2);
+        if(!selectedPostcode){
+            map.current.setFilter('ALL', null)
         } else {
-            stringSlice = selectedPostcode.slice(-1);
-        }
+
+            let stringSlice;
     
-        const layerId = `D${stringSlice}`;
-    
-        if (map && map.current) {  
-            map.current.setFilter(layerId, null);
-        } else if (map) {  
-            map.setFilter(layerId, null);
-        } else {
-            console.error("Map object is not available.");
+            if (selectedPostcode.length >= 9) {
+                stringSlice = selectedPostcode.slice(-2);
+            } else {
+                stringSlice = selectedPostcode.slice(-1);
+            }
+        
+            const layerId = `D${stringSlice}`;
+        
+            if (map && map.current) {  
+                map.current.setFilter(layerId, null);
+            } else if (map) {  
+                map.setFilter(layerId, null);
+            } else {
+                console.error("Map object is not available.");
+            }
+
         }
     }
 
@@ -126,7 +130,9 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             responsive: true,
             plugins: {
                 legend: {
-                    onClick: (e, legendItem) => {},
+                    onClick: (e, legendItem) => {
+                        highlightTreeOnMap(legendItem.text)
+                    },
                     display: true,  // Display legend for Pie charts
                     position: 'right',
                     labels: {
@@ -245,14 +251,14 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     return (
         <div ref={boxRef} onMouseDown={handleMouseDown} className='floating-summary-box'>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                <button className="summarybox-tertiary-button" onClick={() => resetMap()}> 
+                {selectedPostcode ? <button className="summarybox-tertiary-button" onClick={() => resetMap()}> 
                     <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
-                </button>
+                </button> : null}
                 <button className='summarybox-tertiary-button' onClick={resetTreeHighlight}>
                     <FontAwesomeIcon icon={faArrowRotateBack} /> <span style={{marginLeft: '8px'}}>Reset Filter</span>
                 </button>
             </div>
-            <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>Trees of {selectedPostcode}</h1>
+            <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>{selectedPostcode ? `Trees of ${selectedPostcode}` : "All trees of Dublin"}</h1>
             <div className='chart-holder'>
                 {chartData && chartOptions ? (
                     <Pie 

@@ -1,21 +1,23 @@
-import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import React, { useEffect, useRef, useState} from 'react';
+
+// libraries
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import Navbar from './Navbar';
-import SummaryBox from './SummaryBox'
 import centroid from '@turf/centroid';
 import { feature } from '@turf/helpers';
 
+// components
+import Navbar from './Navbar';
+import Sidebar from './Sidebar';
+import SummaryBox from './SummaryBox'
+
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
-import Sidebar from './Sidebar';
-import { createBins } from '@turf/turf';
 
 function Map() {
 
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
     const BASE_API_URL = 'http://127.0.0.1:8000'
-    const STYLE = 'mapbox://styles/harryocleirigh/clkp8dbvm00ls01phf9bl7of1';   
     const mapContainer = useRef(null);
     const map = useRef(null);
     const originalLNG = -6.260259
@@ -42,7 +44,6 @@ function Map() {
     const markerHeight = 10;
     const markerRadius = 10;
     const linearOffset = 5;
-
     const popupOffsets = {
         'top': [0, 0],
         'top-left': [0, 0],
@@ -433,8 +434,6 @@ function Map() {
 
     const handleClickPostcode = async (postcode, map, e) => {
 
-        console.log(postcode, e);
-
         if (isClicked.current){
 
             treeLayers.forEach(layer => {
@@ -502,11 +501,12 @@ function Map() {
     };
 
     const getExistingLayers = () => {
-        return ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W'].filter(layer => map.current.getLayer(layer));
+        return ['D1', 'D2', 'D3', 'D4', 'D5', 'D6','D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D6W', 'ALL'].filter(layer => map.current.getLayer(layer));
     };   
 
     const handleMouseOverTree = () => {
         map.current.on('mousemove', (e) => {
+            console.log(e);
             const existingLayers = getExistingLayers();
             const features = map.current.queryRenderedFeatures(e.point, { layers: existingLayers });
             if (features.length > 0) {
@@ -534,43 +534,11 @@ function Map() {
         });
     };
     
-    const setPostCodeLayersVisibility = (layerIds, isVisible) => {
-        layerIds.forEach(layerId => {
-            if (map.current.getLayer(layerId)) {
-                map.current.setPaintProperty(layerId, 'fill-opacity', 0.4)
-                map.current.setPaintProperty(layerId+'-line', 'line-width', 1)
-                isClicked.current = false;
-            }
-            map.current.setLayoutProperty(layerId, 'visibility', isVisible ? 'visible' : 'none');
-            map.current.setLayoutProperty(layerId+'-line', 'visibility', isVisible ? 'visible' : 'none');
-        });
-    };
-
-    const setGlobalLayersVisibility = (treeLayers, isVisible) => {
-        
-        treeLayers.forEach(treelayer => {
-            if (map.current.getLayer(treelayer)) { // Ensure the layer exists before trying to modify it
-                map.current.setLayoutProperty(treelayer, 'visibility', isVisible ? 'visible' : 'none');
-            }
-        })
-
-        setTimeout(() => setIsSummaryBoxShowing(true), 500);
-
-        if (map.current.getSource('ALL')) {
-            const allLayerData = map.current.getSource('ALL')._data;
-            if (allLayerData && allLayerData.features) {
-                const speciesTally = tallySpecies(allLayerData.features);
-                setTreeStats(speciesTally);
-            }
-        }  
-    };
-
     // fetch operations
     const fetchTrees = async (url, setTreeData, treeNumber) => {
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                console.log(response)
                 const message = `An error has occurred: ${response.status}: ${url}, ${setTreeData}, ${treeNumber}`;
                 throw new Error(message);
             }
@@ -699,11 +667,12 @@ function Map() {
                 ) : <></>}
 
             <Navbar 
-                treeLayers={treeLayers}
+                map={map}
                 postcodeLayers={postcodeLayers}
-                postcodeLineLayers={postcodeLineLayers}
-                setPostCodeLayersVisibility={setPostCodeLayersVisibility}
-                setGlobalLayersVisibility={setGlobalLayersVisibility}
+                setTreeStats={setTreeStats}
+                tallySpecies={tallySpecies}
+                setIsSummaryBoxShowing={setIsSummaryBoxShowing}
+                setSelectedPostcode={setSelectedPostcode}
             />
         </div>
 
