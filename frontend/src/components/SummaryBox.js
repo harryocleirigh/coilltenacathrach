@@ -18,6 +18,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     const [chartData, setChartData] = useState(null);
     const [chartOptions, setChartOptions] = useState(null);
     const [filteringInProgress, setFilteringInProgress] = useState(false);
+    const [dropdownValue, setDropdownValue] = useState("");
 
     const chartRef = useRef();
 
@@ -33,6 +34,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
     const dropdownValueSelected = (value) => {
 
         const dropdownValue = (value.target.value)
+        setDropdownValue(dropdownValue)
         highlightTreeOnMap(dropdownValue)
 
     }
@@ -49,6 +51,8 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             if (chartData && chartData.labels && chartData.datasets) {
                 
                 const label = chartData.labels[dataIndex];
+
+                setDropdownValue(label)
 
                 highlightTreeOnMap(label)
 
@@ -115,11 +119,11 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
 
     const resetTreeHighlight = () => {
 
+        setDropdownValue("")
         setFilteringInProgress(true);  // Start the animation
     
         if(!selectedPostcode){
             map.current.setFilter('ALL', null);
-            // Don't setFilteringInProgress to false here; let the 'idle' event handle it.
         } else {
             let stringSlice;
             if (selectedPostcode.length >= 9) {
@@ -137,7 +141,6 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             } else {
                 console.error("Map object is not available.");
             }
-            // Don't setFilteringInProgress to false here; let the 'idle' event handle it.
         }
     }
     
@@ -158,8 +161,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
                 map.current.off('idle', handleMapIdle);
             }
         };
-    }, [map]);  // This useEffect runs when the map object changes
-    
+    }, [map]);
 
     // function used to make the chart options
     const makeChartOptions = () => {
@@ -169,6 +171,7 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
             plugins: {
                 legend: {
                     onClick: (e, legendItem) => {
+                        setDropdownValue(legendItem.text)
                         highlightTreeOnMap(legendItem.text)
                     },
                     display: true,  // Display legend for Pie charts
@@ -293,9 +296,9 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap}){
                     <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
                 </button> : null}
             </div>
-            <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>{selectedPostcode ? `Trees of ${selectedPostcode}` : "All trees of Dublin"}</h1>
+            <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>{selectedPostcode ? `Trees of ${selectedPostcode}` : "Trees of Dublin"}</h1>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                <select className='summarybox-dropdown' onChange={dropdownValueSelected}>
+                <select  value={dropdownValue} className='summarybox-dropdown' onChange={dropdownValueSelected}>
                     <option value="" disabled selected>Filter by tree</option>
                     {dropDownOptions}
                 </select>
