@@ -77,7 +77,7 @@ app.get('/debug/cache', (req, res) => {
 app.use('/trees', cacheMiddleware(3600));
 app.use('/trees', createProxyMiddleware({ 
 
-    target: 'http://34.254.173.244:5000',
+    target: 'http://localhost:5000',
     changeOrigin: true,
     selfHandleResponse: true, // Add this line to handle the response ourselves
     onProxyRes: (proxyRes, req, res) => {
@@ -100,7 +100,7 @@ app.use('/trees', createProxyMiddleware({
   
           if (proxyRes.statusCode === 200 && proxyRes.headers['content-type'] && proxyRes.headers['content-type'].includes('application/json')) {
               const key = req.originalUrl || req.url;
-              cache.set(key, body, 36000);
+              cache.set(key, body, 3600);
               console.log('Cached data for', key);
           }
   
@@ -118,7 +118,7 @@ app.use('/trees', createProxyMiddleware({
   }  
 }));
 
-app.use('/singletree', createProxyMiddleware({ target: 'http://34.254.173.244:5000', changeOrigin: true }));
+app.use('/singletree', createProxyMiddleware({ target: 'http://localhost:5000', changeOrigin: true }));
 
 // launch app
 app.listen(PORT, () => {

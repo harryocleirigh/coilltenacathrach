@@ -17,8 +17,7 @@ import neighbourhoods from '../data/revisedneighbourhood.geojson'
 function Map() {
 
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
-    const BASE_API_URL = process.env.BASE_API_URL_ENDPOINT;
-    const mapContainer = useRef(null);
+    const BASE_API_URL = process.env.BASE_API_URL_ENDPOINT || 'http://localhost:5000';    const mapContainer = useRef(null);
     const map = useRef(null);
     const originalLNG = -6.260259
     const originalLAT = 53.349811
