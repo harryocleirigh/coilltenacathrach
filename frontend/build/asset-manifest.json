@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/static/css/main.7a40ce34.css",
-    "main.js": "/static/js/main.8d468549.js",
+    "main.js": "/static/js/main.a4662b94.js",
     "static/js/787.a88271c9.chunk.js": "/static/js/787.a88271c9.chunk.js",
     "static/media/revisedneighbourhood.geojson": "/static/media/revisedneighbourhood.00fe341b36d20e029276.geojson",
     "static/js/mapbox-gl-csp-worker.d792f098.worker.js": "/static/js/mapbox-gl-csp-worker.d792f098.worker.js",
     "index.html": "/index.html",
     "main.7a40ce34.css.map": "/static/css/main.7a40ce34.css.map",
-    "main.8d468549.js.map": "/static/js/main.8d468549.js.map",
+    "main.a4662b94.js.map": "/static/js/main.a4662b94.js.map",
     "787.a88271c9.chunk.js.map": "/static/js/787.a88271c9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.7a40ce34.css",
-    "static/js/main.8d468549.js"
+    "static/js/main.a4662b94.js"
   ]
 }
