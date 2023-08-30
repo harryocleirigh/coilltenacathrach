@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.7a40ce34.css",
+    "main.js": "/static/js/main.1dc83cfe.js",
+    "static/js/787.a88271c9.chunk.js": "/static/js/787.a88271c9.chunk.js",
+    "static/media/revisedneighbourhood.geojson": "/static/media/revisedneighbourhood.00fe341b36d20e029276.geojson",
+    "index.html": "/index.html",
+    "main.7a40ce34.css.map": "/static/css/main.7a40ce34.css.map",
+    "main.1dc83cfe.js.map": "/static/js/main.1dc83cfe.js.map",
+    "787.a88271c9.chunk.js.map": "/static/js/787.a88271c9.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.7a40ce34.css",
+    "static/js/main.1dc83cfe.js"
+  ]
+}
