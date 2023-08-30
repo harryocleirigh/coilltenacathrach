@@ -77,7 +77,7 @@ app.get('/debug/cache', (req, res) => {
 app.use('/trees', cacheMiddleware(3600));
 app.use('/trees', createProxyMiddleware({ 
 
-    target: 'http://127.0.0.1:5000',
+    target: 'http://34.254.173.244:5000',
     changeOrigin: true,
     selfHandleResponse: true, // Add this line to handle the response ourselves
     onProxyRes: (proxyRes, req, res) => {
@@ -118,7 +118,7 @@ app.use('/trees', createProxyMiddleware({
   }  
 }));
 
-app.use('/singletree', createProxyMiddleware({ target: 'http://127.0.0.1:5000', changeOrigin: true }));
+app.use('/singletree', createProxyMiddleware({ target: 'http://34.254.173.244:5000', changeOrigin: true }));
 
 // launch app
 app.listen(PORT, () => {
