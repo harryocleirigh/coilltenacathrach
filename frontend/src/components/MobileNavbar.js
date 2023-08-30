@@ -3,19 +3,19 @@ import '../App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTreeCity, faTree, faEye} from '@fortawesome/free-solid-svg-icons'
 
-export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBoxShowing, setSelectedPostcode, postcodeLayers, isSummaryBoxShowing, isSummaryBoxAvailable, setIsSummaryBoxAvailable, treeLayers, isClicked}) {
+export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBoxShowing, setSelectedPostcode, postcodeLayers, isSummaryBoxShowing, isSummaryBoxAvailable, setIsSummaryBoxAvailable, isSummaryBoxAvailableRef, treeLayers, isClicked}) {
 
   const [areAllTreesShowing, setAreAllTreesShowing] = useState(false)
 
   return (
     
-    <div className="navbar">
-      <div className="navbar-links">
+    <div className="mobile-navbar">
+      <div className="navbar-links-mobile">
         <FontAwesomeIcon 
           icon={faTreeCity} 
           onClick={() => window.location.reload()} 
-          style={{height: '100%', width: '36px', cursor: 'pointer'}}/>
-          <h1 className='h1-sidebar-heading'>Trees of Dublin</h1>
+          style={{height: '100%', width: '24px', cursor: 'pointer'}}/>
+          <h1 className='h1-sidebar-heading-mobile'>Trees of Dublin</h1>
       </div>
       <div style={{display: 'flex', flexDirection: 'row', gap: '24px'}}>
         {isSummaryBoxAvailable && !isSummaryBoxShowing ? (
@@ -53,6 +53,7 @@ export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBo
               setIsSummaryBoxShowing(true);
               setSelectedPostcode(null);
               setIsSummaryBoxAvailable(true);
+              isSummaryBoxAvailableRef.current = true
 
             } else {
 

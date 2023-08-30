@@ -1,10 +1,17 @@
 import './App.css';
 import Map from './components/Map';
+import MobileMap from './components/MobileMap';
 
 function App() {
+
+  const isMobileDevice = () => {
+    return (typeof window.orientation !== "undefined") && (window.innerWidth < 541);
+  };
+
+
   return (
     <div>
-      <Map />
+        {isMobileDevice() ? <MobileMap /> : <Map />}
     </div>
   );
 }

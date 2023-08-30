@@ -11,7 +11,7 @@ Chart.register(
     Legend
 )
 
-function SummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBoxShowing}){
+function MobileSummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBoxShowing, isSummaryBoxShowing}){
 
     const [labels, setLabels] = useState(null);
     const [data, setData] = useState(null)
@@ -34,8 +34,10 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBo
     const dropdownValueSelected = (value) => {
 
         const dropdownValue = (value.target.value)
+        setIsSummaryBoxShowing(false);
         setDropdownValue(dropdownValue)
         highlightTreeOnMap(dropdownValue)
+        
 
     }
 
@@ -52,7 +54,9 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBo
                 
                 const label = chartData.labels[dataIndex];
 
-                setDropdownValue(label)
+                setDropdownValue(label);
+
+                setIsSummaryBoxShowing(false);
 
                 highlightTreeOnMap(label)
 
@@ -174,13 +178,13 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBo
                         setDropdownValue(legendItem.text)
                         highlightTreeOnMap(legendItem.text)
                     },
-                    display: true,  // Display legend for Pie charts
-                    position: 'right',
+                    display: false,  // Display legend for Pie charts
+                    position: 'bottom',
                     labels: {
                         padding: 12,
                         color: 'white',
                         font: {
-                            size: 12,
+                            size: 10,
                             family: 'Inter'
                         }
                     }
@@ -290,28 +294,28 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBo
     }, [isDragging, offsetX, offsetY]);
 
     return (
-        <div ref={boxRef} onMouseDown={handleMouseDown} className='floating-summary-box'>
+        <div className={`floating-summary-box-mobile${isSummaryBoxShowing ? ' open' : ''}`} ref={boxRef} onMouseDown={handleMouseDown}>
             <div style={{display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between'}}>
                 {selectedPostcode ? <button className="summarybox-tertiary-button" onClick={() => resetMap()}> 
                     <FontAwesomeIcon icon={faArrowLeft} /> <span style={{marginLeft: '8px'}}>Go Back</span>
-                </button> : null}
+                </button> : <div style={{ width: '101px'}}></div>}
                 <button className='summarybox-tertiary-button' onClick={() => {setIsSummaryBoxShowing(false);}}>
                     <FontAwesomeIcon icon={faEyeSlash} /> <span style={{marginLeft: '8px'}}>Hide Window</span>
                 </button>
             </div>
-            <h1 style={{textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>{selectedPostcode ? `Trees of ${selectedPostcode}` : "Trees of Dublin"}</h1>
+            <h1 style={{fontSize: '24px', textAlign: 'center', marginTop: '8px', marginBottom: '24px'}}>{selectedPostcode ? `Trees of ${selectedPostcode}` : "Trees of Dublin"}</h1>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                 <select  value={dropdownValue} className='summarybox-dropdown' onChange={dropdownValueSelected}>
                     <option value="" disabled selected>Filter by tree</option>
                     {dropDownOptions}
                 </select>
-                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                <div style={{display: 'flex', flexDirection: 'row'}}>
                     <button className='reset-filter-button' onClick={resetTreeHighlight}>
                         <FontAwesomeIcon className={filteringInProgress ? "rotating" : ""} icon={faArrowRotateBack} /> <span style={{marginLeft: '8px'}}>Reset Filter</span>
                     </button>
                 </div>
             </div>
-            <div className='chart-holder'>
+            <div className='chart-holder-mobile'>
                 {chartData && chartOptions ? (
                     <Pie 
                         style={{height: '100%'}}
@@ -328,4 +332,4 @@ function SummaryBox ({selectedPostcode, treeStats, map, resetMap, setIsSummaryBo
     )
 }
     
-export default SummaryBox;
+export default MobileSummaryBox;
