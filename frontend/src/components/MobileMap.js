@@ -14,6 +14,11 @@ import MobileSummaryBox from './MobileSummaryBox'
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
 
+// Note: the following lines are important to create a production build that includes mapbox
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
+
 function Map() {
 
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
