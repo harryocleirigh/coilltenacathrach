@@ -3,16 +3,19 @@ body{
 }
 
 h1 {
-  font-size: 22px;
+  font-size: 32px;
 }
 
 h2 {
   font-size: 18px;
 }
 
-
 p {
   font-size: 12px;
+}
+
+.h1-sidebar-heading {
+  font-size: 22px;
 }
 
 .map-container{
@@ -24,7 +27,7 @@ p {
 a {
   text-decoration: none;
   color: #dfe2e5;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .navbar  {
@@ -37,16 +40,33 @@ a {
   display: flex;
   align-items: center;
   z-index: 100;
+  justify-content: space-between;
 }
 
 .transparent-button  {
-  height: 40px;
-  width: 150px;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  /* background-color: rgba(1, 141, 48, 0.25); */
+  background-color: rgba(18, 19, 22, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: auto;
   color: white;
-  border: none;
   padding: 0;
   cursor: pointer;
   border-radius: 5px;
+  padding: 8px;
+  text-align: center;
+  align-items: center;
+  height: auto;
+}
+
+.transparent-button:hover  {
+  background-color: rgba(18, 19, 22, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.transparent-button:active  {
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .navbar-links  {
@@ -55,6 +75,9 @@ a {
   align-items: center;
   font-size: large;
   transition: background-color 0.7s ease;
+  flex-direction: row;
+  gap: 24px;
+  margin-left: 48px;
 }
 
 .navbar-links button  {
@@ -73,10 +96,6 @@ a {
   padding:10px;
 }
 
-.navbar-links:hover  {
-  background-color: rgb(215, 215, 220);
-
-}
 .navbar img  {
   max-height: 72px;
   max-width: 150px;
@@ -139,6 +158,7 @@ a {
   height: 100%;
   min-height: 400px;
   width: 100%;
+  border-radius: 5px;
 }
 
 .mapboxgl-control-container{
@@ -154,7 +174,7 @@ a {
   padding-right: 12px;
   font-weight: 800;
   background-color: rgba(18, 19, 22, 0);
-  height: 28px;
+  height: 32px;
   border-radius: 5px;
   border: none;
   cursor: pointer;
@@ -205,7 +225,7 @@ a {
 
 .icon-holder {
   width: 60px;
-  height: 28px;
+  height: 32px;
   text-align: center;
   padding: 4px 8px;
   display: flex;
@@ -231,6 +251,29 @@ a {
   text-align: center;
 }
 
+.summarybox-dropdown{
+  width: 50%;
+  height: 32px;
+  border-radius: 5px;
+  padding-left: 12px;
+  color:white;
+  background-color: #12131640;
+  border: 1px solid rgba(255, 255, 255, 0.125);
+}
+
+@keyframes rotating {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(-360deg);
+  }
+}
+
+.rotating {
+  animation: rotating 1s linear infinite;
+}
+
 @media screen and (max-width: 900px) {
   .sidebar {
       display: none;
@@ -238,4 +281,121 @@ a {
   .map-container {
       width: 100vw;
   }
+}
+
+.mobile-navbar {
+  position: absolute;
+  top: 0px;
+  left: 24px;
+  right: 24px;
+  height: 36px;
+  color: white;
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  justify-content: space-between;
+}
+
+.navbar-links-mobile{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.h1-sidebar-heading-mobile{
+  font-size: 18px;
+}
+
+.floating-summary-box-mobile {
+  align-items: center;
+  position: absolute;
+  z-index: 999;
+  min-width: 300px;
+  max-width: 300px;
+  margin-top: 64px;
+  left: 0;
+  margin-left: 12px;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background-color: rgba(18, 19, 22, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  color: white;
+  padding: 24px 18px;
+  align-items: left;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  
+  /* Initial position off-screen */
+  transform: translateX(-100%);
+  
+  /* Transition for smooth animation */
+  transition: transform 0.3s ease-out;
+}
+
+.floating-summary-box-mobile.open {
+  /* Slide in */
+  transform: translateX(0);
+}
+
+.chart-holder-mobile{
+  padding-top: 24px;
+  cursor: pointer;
+  height: 100%;
+  min-height: 300px;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.reset-filter-button {
+  width: auto;
+  color: white;
+  text-align: left;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-weight: 800;
+  background-color: rgba(18, 19, 22, 0);
+  height: 32px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.reset-filter-button:hover{
+  background-color: rgba(255, 255, 255, 0.1); /* Slight white background on hover */
+}
+
+.reset-filter-button:active{
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3); /* White outline on focus */
+}
+
+.mobile-sidebar {
+  bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  position: absolute; 
+  right: 12px; 
+  height: 100%;
+  width: 48px;
+  z-index: 100;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.transparent-mobile-button{
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background-color: rgba(18, 19, 22, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 48px;
+  height: 48px;
+  color: white;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 8px;
+  text-align: center;
+  align-items: center;
 }

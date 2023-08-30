@@ -7,13 +7,12 @@ import centroid from '@turf/centroid';
 import { feature } from '@turf/helpers';
 
 // components
-import Navbar from './Navbar';
-import Sidebar from './Sidebar';
-import SummaryBox from './SummaryBox'
+import MobileNavbar from './MobileNavbar'
+import MobileSidebar from './MobileSidebar';
+import MobileSummaryBox from './MobileSummaryBox'
 
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
-import { faL } from '@fortawesome/free-solid-svg-icons';
 
 function Map() {
 
@@ -34,11 +33,13 @@ function Map() {
     const [singleTreeData, setSingleTreeData] = useState(null);
     const [isStyleLoaded, setIsStyleLoaded] = useState(false);
     const [isAllDataLoaded, setIsAllDataLoaded] = useState(false);
+    const [areAllTreesShowing, setAreAllTreesShowing] = useState(false)
     const isClicked = useRef(false);
 
     const [isSummaryBoxShowing, setIsSummaryBoxShowing] = useState(false);
     const [isSummaryBoxAvailable, setIsSummaryBoxAvailable] = useState(false);
     const [selectedPostcode, setSelectedPostcode] = useState(null);
+    const isSummaryBoxAvailableRef = useRef(false)
 
     const [treeStats, setTreeStats] = useState(null);
 
@@ -250,7 +251,7 @@ function Map() {
                 container: mapContainer.current,
                 style: 'mapbox://styles/mapbox/dark-v11',
                 center: [originalLNG, originalLAT],
-                zoom: 11,
+                zoom: 10,
                 pitch: 30,
                 maxZoom: 20,
                 minZoom: 10
@@ -394,9 +395,9 @@ function Map() {
 
         postcodes.features.forEach((postcode) => {
 
-            map.on('mousemove', postcode.properties.postcodes, (e) => handleMouseMovePostcode(postcode, map, e))
+            map.on('touchstart', postcode.properties.postcodes, (e) => handleMouseMovePostcode(postcode, map, e))
 
-            map.on('mouseleave', postcode.properties.postcodes, () => handleMouseLeavePostcode(postcode, map))
+            map.on('touchend', postcode.properties.postcodes, () => handleMouseLeavePostcode(postcode, map))
 
             map.on('click', postcode.properties.postcodes, (e) => handleClickPostcode(postcode, map, e))
         
@@ -436,70 +437,77 @@ function Map() {
 
     const handleClickPostcode = async (postcode, map, e) => {
 
-        if (isClicked.current){
+        if (isSummaryBoxAvailableRef.current){
+            return
+        } else {
+                
+            if (isClicked.current){
 
-            treeLayers.forEach(layer => {
-                map.setLayoutProperty(layer, 'visibility', 'none');
-            })
-            
-        }
-    
-        setSelectedPostcode(postcode.properties.postcodes);
+                treeLayers.forEach(layer => {
+                    map.setLayoutProperty(layer, 'visibility', 'none');
+                })
+                
+            }
         
-        isClicked.current = true;
-
-        const features = map.queryRenderedFeatures(e.point);
-
-        const clickedPostCode = postcode.properties.postcodes
-
-        if (features.length > 0) {
+            setSelectedPostcode(postcode.properties.postcodes);
             
-            postcodes.features.forEach((postcode) => {
+            isClicked.current = true;
+
+            const features = map.queryRenderedFeatures(e.point);
+
+            const clickedPostCode = postcode.properties.postcodes
+
+            if (features.length > 0) {
+                
+                postcodes.features.forEach((postcode) => {
+
+                    const layerId = postcode.properties.postcodes;
+                    const lineLayerId = `${layerId}-line`;
+
+                    if (clickedPostCode != layerId){
+                        map.setPaintProperty(layerId, 'fill-opacity', 0);
+                        map.setPaintProperty(lineLayerId, 'line-width', 0);
+                    }            
+                });
+
+                const [firstFeature] = features;
+
+                // Create a GeoJSON feature object from the clicked feature
+                const geojsonFeature = feature(firstFeature.geometry);
+        
+                // Use turf to calculate the centroid of the feature
+                const featureCentroid = centroid(geojsonFeature);
+        
+                // Get the coordinates of the centroid
+                const [lng, lat] = featureCentroid.geometry.coordinates;
+        
+                // Fly to the centroid of the polygon
+                map.flyTo({ center: [lng, lat], zoom: 13, essential: true });
 
                 const layerId = postcode.properties.postcodes;
                 const lineLayerId = `${layerId}-line`;
+                map.setPaintProperty(layerId, 'fill-opacity', 0.4);
+                map.setPaintProperty(lineLayerId, 'line-width', 3);
+                map.setPaintProperty(layerId+'-text', 'text-color', '#f5f5f5' )
 
-                if (clickedPostCode != layerId){
-                    map.setPaintProperty(layerId, 'fill-opacity', 0);
-                    map.setPaintProperty(lineLayerId, 'line-width', 0);
-                }            
-            });
+                let singlePostcode;
+                if (layerId.length >= 9){
+                    // "D______11 => D11"
+                    singlePostcode = layerId.slice(-2)
+                } else {
+                    // "D______5 => D5"
+                    singlePostcode = layerId.slice(-1)
+                }
 
-            const [firstFeature] = features;
+                map.setLayoutProperty(`D${singlePostcode}`, 'visibility', 'visible');
 
-            // Create a GeoJSON feature object from the clicked feature
-            const geojsonFeature = feature(firstFeature.geometry);
-    
-            // Use turf to calculate the centroid of the feature
-            const featureCentroid = centroid(geojsonFeature);
-    
-            // Get the coordinates of the centroid
-            const [lng, lat] = featureCentroid.geometry.coordinates;
-    
-            // Fly to the centroid of the polygon
-            map.flyTo({ center: [lng, lat], zoom: 13, essential: true });
+                setIsSummaryBoxShowing(true);
 
-            const layerId = postcode.properties.postcodes;
-            const lineLayerId = `${layerId}-line`;
-            map.setPaintProperty(layerId, 'fill-opacity', 0.4);
-            map.setPaintProperty(lineLayerId, 'line-width', 3);
-            map.setPaintProperty(layerId+'-text', 'text-color', '#f5f5f5' )
+                setIsSummaryBoxAvailable(true);
 
-            let singlePostcode;
-            if (layerId.length >= 9){
-                // "D______11 => D11"
-                singlePostcode = layerId.slice(-2)
-            } else {
-                // "D______5 => D5"
-                singlePostcode = layerId.slice(-1)
+                isSummaryBoxAvailableRef.current = true
+
             }
-
-            map.setLayoutProperty(`D${singlePostcode}`, 'visibility', 'visible');
-
-            setIsSummaryBoxShowing(true);
-
-            setIsSummaryBoxAvailable(true);
-
         }
 
     };
@@ -509,7 +517,7 @@ function Map() {
     };   
 
     const handleMouseOverTree = () => {
-        map.current.on('mousemove', (e) => {
+        map.current.on('touchstart', (e) => {
             const existingLayers = getExistingLayers();
             const features = map.current.queryRenderedFeatures(e.point, { layers: existingLayers });
             if (features.length > 0) {
@@ -626,6 +634,7 @@ function Map() {
 
     }, [selectedPostcode])
 
+    // reset the to onload state
     const resetMap = () => {
 
         isClicked.current = false;
@@ -641,7 +650,7 @@ function Map() {
             map.current.setPaintProperty(layer+'-text', 'text-color', '#B1FFB1')
         })
 
-        map.current.flyTo({ center: [originalLNG, originalLAT], zoom: 11, essential: true })
+        map.current.flyTo({ center: [originalLNG, originalLAT], zoom: 10, essential: true })
 
         if (popup.current){
             popup.current.remove()
@@ -650,31 +659,20 @@ function Map() {
         if (isSummaryBoxShowing){
             setIsSummaryBoxShowing(false);
             setIsSummaryBoxAvailable(false);
+            isSummaryBoxAvailableRef.current = false;
         }
     }
 
     return  (
         
         <div style={{ position: 'relative', height: '100vh' }}>
-
-            <Sidebar />
         
             <div ref={mapContainer} className='map-container'>
 
-            {isSummaryBoxShowing ? (
-                <SummaryBox
-                    map={map}
-                    selectedPostcode={selectedPostcode}
-                    treeStats={treeStats}
-                    resetMap={resetMap}
-                    setIsSummaryBoxShowing={setIsSummaryBoxShowing}
-                    isSummaryBoxShowing={isSummaryBoxShowing}
-                    setIsSummaryBoxAvailable={setIsSummaryBoxAvailable}
-                />
-                ) : <></>}
-
-            <Navbar 
+            <MobileSidebar
                 map={map}
+                areAllTreesShowing={areAllTreesShowing}
+                setAreAllTreesShowing={setAreAllTreesShowing}
                 treeLayers={treeLayers}
                 isClicked={isClicked}
                 postcodeLayers={postcodeLayers}
@@ -685,6 +683,24 @@ function Map() {
                 isSummaryBoxShowing={isSummaryBoxShowing}
                 isSummaryBoxAvailable={isSummaryBoxAvailable}
                 setIsSummaryBoxAvailable={setIsSummaryBoxAvailable}
+                isSummaryBoxAvailableRef={isSummaryBoxAvailableRef}
+            />
+
+            {isSummaryBoxAvailable ? (
+                <MobileSummaryBox
+                    map={map}
+                    selectedPostcode={selectedPostcode}
+                    treeStats={treeStats}
+                    resetMap={resetMap}
+                    isSummaryBoxShowing={isSummaryBoxShowing}
+                    setIsSummaryBoxShowing={setIsSummaryBoxShowing}
+                    setIsSummaryBoxAvailable={setIsSummaryBoxAvailable}
+                    isSummaryBoxAvailableRef={isSummaryBoxAvailableRef}
+                />
+                ) : <></>}
+
+            <MobileNavbar 
+                areAllTreesShowing={areAllTreesShowing}
             />
         </div>
 
