@@ -8,7 +8,7 @@ import { feature } from '@turf/helpers';
 
 // components
 import MobileNavbar from './MobileNavbar'
-import Sidebar from './Sidebar';
+import MobileSidebar from './MobileSidebar';
 import MobileSummaryBox from './MobileSummaryBox'
 
 // data
@@ -33,6 +33,7 @@ function Map() {
     const [singleTreeData, setSingleTreeData] = useState(null);
     const [isStyleLoaded, setIsStyleLoaded] = useState(false);
     const [isAllDataLoaded, setIsAllDataLoaded] = useState(false);
+    const [areAllTreesShowing, setAreAllTreesShowing] = useState(false)
     const isClicked = useRef(false);
 
     const [isSummaryBoxShowing, setIsSummaryBoxShowing] = useState(false);
@@ -633,6 +634,7 @@ function Map() {
 
     }, [selectedPostcode])
 
+    // reset the to onload state
     const resetMap = () => {
 
         isClicked.current = false;
@@ -667,6 +669,23 @@ function Map() {
         
             <div ref={mapContainer} className='map-container'>
 
+            <MobileSidebar
+                map={map}
+                areAllTreesShowing={areAllTreesShowing}
+                setAreAllTreesShowing={setAreAllTreesShowing}
+                treeLayers={treeLayers}
+                isClicked={isClicked}
+                postcodeLayers={postcodeLayers}
+                setTreeStats={setTreeStats}
+                tallySpecies={tallySpecies}
+                setIsSummaryBoxShowing={setIsSummaryBoxShowing}
+                setSelectedPostcode={setSelectedPostcode}
+                isSummaryBoxShowing={isSummaryBoxShowing}
+                isSummaryBoxAvailable={isSummaryBoxAvailable}
+                setIsSummaryBoxAvailable={setIsSummaryBoxAvailable}
+                isSummaryBoxAvailableRef={isSummaryBoxAvailableRef}
+            />
+
             {isSummaryBoxAvailable ? (
                 <MobileSummaryBox
                     map={map}
@@ -681,18 +700,7 @@ function Map() {
                 ) : <></>}
 
             <MobileNavbar 
-                map={map}
-                isClicked={isClicked}
-                isSummaryBoxAvailableRef={isSummaryBoxAvailableRef}
-                treeLayers={treeLayers}
-                postcodeLayers={postcodeLayers}
-                setTreeStats={setTreeStats}
-                tallySpecies={tallySpecies}
-                setIsSummaryBoxShowing={setIsSummaryBoxShowing}
-                setSelectedPostcode={setSelectedPostcode}
-                isSummaryBoxShowing={isSummaryBoxShowing}
-                isSummaryBoxAvailable={isSummaryBoxAvailable}
-                setIsSummaryBoxAvailable={setIsSummaryBoxAvailable}
+                areAllTreesShowing={areAllTreesShowing}
             />
         </div>
 

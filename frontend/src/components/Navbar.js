@@ -29,6 +29,7 @@ export default function Navbar({ map, setTreeStats, tallySpecies, setIsSummaryBo
           onClick={() => {
             if (!areAllTreesShowing) {
 
+              // set to spire lng lat and original zoom level on map load
               map.current.flyTo({ center: [-6.260259, 53.349811], zoom: 11, essential: true });
 
               map.current.setLayoutProperty('ALL', 'visibility', 'visible');
