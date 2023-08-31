@@ -22,7 +22,7 @@ mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worke
 function Map() {
 
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
-    const BASE_API_URL = process.env.BASE_API_URL_ENDPOINT;
+    const BASE_API_URL = process.env.REACT_APP_BASE_API_URL_ENDPOINT;
     const mapContainer = useRef(null);
     const map = useRef(null);
     const originalLNG = -6.260259
