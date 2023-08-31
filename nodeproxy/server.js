@@ -36,7 +36,7 @@ app.use(compression());
 function cacheMiddleware(duration) {
 
   return (req, res, next) => {
-    
+
       const key = req.originalUrl || req.url;
       const cachedResponse = cache.get(key);
 
@@ -74,10 +74,11 @@ app.get('/debug/cache', (req, res) => {
 });
 
 // middleware proxies
-app.use('/trees', cacheMiddleware(3600));
-app.use('/trees', createProxyMiddleware({ 
+app.use('/node/trees', cacheMiddleware(3600));
+app.use('/node/trees', createProxyMiddleware({
 
-    target: 'http://localhost:5000',
+    target: 'http://localhost:5000'
+    pathRewrite: { '^/node/trees': '/trees' },
     changeOrigin: true,
     selfHandleResponse: true, // Add this line to handle the response ourselves
     onProxyRes: (proxyRes, req, res) => {
@@ -86,39 +87,39 @@ app.use('/trees', createProxyMiddleware({
 
       proxyRes.on('data', chunk => {
           bodyChunks.push(chunk);
-      }); 
-  
+      });
+
       proxyRes.on('end', () => {
 
           const body = Buffer.concat(bodyChunks).toString();
 
           res.setHeader('Access-Control-Allow-Origin', '*');
           res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');    
-  
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
           console.log(`Response from Flask for ${req.url}:`, proxyRes.statusCode);
-  
+
           if (proxyRes.statusCode === 200 && proxyRes.headers['content-type'] && proxyRes.headers['content-type'].includes('application/json')) {
               const key = req.originalUrl || req.url;
               cache.set(key, body, 3600);
               console.log('Cached data for', key);
           }
-  
+
           // Copy the headers from the Flask response to the Node response
           Object.keys(proxyRes.headers).forEach(function (key) {
               res.setHeader(key, proxyRes.headers[key]);
           });
-  
+
           // Set the status code from the Flask response
           res.status(proxyRes.statusCode);
-  
+
           // End the response with the body
           res.end(body);
       });
-  }  
+  }
 }));
 
-app.use('/singletree', createProxyMiddleware({ target: 'http://localhost:5000', changeOrigin: true }));
+app.use('/node/singletree', createProxyMiddleware({ target: 'http://localhost:5000', pathRewrite: { '^/node/singletree': '/singletree' },  changeOrigin: true>
 
 // launch app
 app.listen(PORT, () => {
