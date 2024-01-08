@@ -1,0 +1,31 @@
+FROM python:3.9
+
+# Set working directory
+WORKDIR /app
+
+# Copy application code
+ADD . /app
+
+# Install GDAL dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    make \
+    libgdal-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the GDAL_CONFIG environment variable
+ENV GDAL_CONFIG=/usr/bin/gdal-config
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose the port the app runs on
+EXPOSE 5000
+
+# Set environment variable
+ENV NAME World
+
+CMD ["python", "app.py"]
