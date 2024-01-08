@@ -119,7 +119,7 @@ app.use('/node/trees', createProxyMiddleware({
   }  
 }));
 
-app.use('/node/singletree', createProxyMiddleware({ target: 'https://localhost:5000', pathRewrite: { '^/node/singletree': '/singletree' }, changeOrigin: true }));
+app.use('/node/singletree', createProxyMiddleware({ target: 'https://backend:5000', pathRewrite: { '^/node/singletree': '/singletree' }, changeOrigin: true }));
 
 // launch app
 app.listen(PORT, () => {
