@@ -74,10 +74,10 @@ app.get('/debug/cache', (req, res) => {
 });
 
 // middleware proxies
-app.use('/node/trees', cacheMiddleware(3600));
+app.use('/node/trees', cacheMiddleware(360000));
 app.use('/node/trees', createProxyMiddleware({ 
 
-    target: 'https://localhost:5000',
+    target: 'https://backend:5000',
     pathRewrite: { '^/node/trees': '/trees' },
     changeOrigin: true,
     selfHandleResponse: true, // Add this line to handle the response ourselves
@@ -119,7 +119,7 @@ app.use('/node/trees', createProxyMiddleware({
   }  
 }));
 
-app.use('/node/singletree', createProxyMiddleware({ target: 'https://localhost:5000', pathRewrite: { '^/node/singletree': '/singletree' }, changeOrigin: true }));
+app.use('/node/singletree', createProxyMiddleware({ target: 'https://backend:5000', pathRewrite: { '^/node/singletree': '/singletree' }, changeOrigin: true }));
 
 // launch app
 app.listen(PORT, () => {
