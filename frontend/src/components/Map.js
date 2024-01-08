@@ -13,12 +13,16 @@ import SummaryBox from './SummaryBox'
 
 // data
 import neighbourhoods from '../data/revisedneighbourhood.geojson'
-import { faL } from '@fortawesome/free-solid-svg-icons';
+
+// Note: the following lines are important to create a production build that includes mapbox
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 
 function Map() {
 
     const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_API_KEY;
-    const BASE_API_URL = 'http://127.0.0.1:8000'
+    const BASE_API_URL = process.env.REACT_APP_BASE_API_URL_ENDPOINT;
     const mapContainer = useRef(null);
     const map = useRef(null);
     const originalLNG = -6.260259
