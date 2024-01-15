@@ -20,4 +20,4 @@ services:
       - trees
 networks:
   trees:
-    driver: bridge
+    driver: bridge  
