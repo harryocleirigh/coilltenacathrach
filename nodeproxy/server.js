@@ -77,7 +77,7 @@ app.get('/debug/cache', (req, res) => {
 app.use('/node/trees', cacheMiddleware(360000));
 app.use('/node/trees', createProxyMiddleware({ 
 
-    target: 'https://backend:5000',
+    target: 'http://backend:5000',
     pathRewrite: { '^/node/trees': '/trees' },
     changeOrigin: true,
     selfHandleResponse: true, // Add this line to handle the response ourselves
@@ -119,9 +119,9 @@ app.use('/node/trees', createProxyMiddleware({
   }  
 }));
 
-app.use('/node/singletree', createProxyMiddleware({ target: 'https://backend:5000', pathRewrite: { '^/node/singletree': '/singletree' }, changeOrigin: true }));
+app.use('/node/singletree', createProxyMiddleware({ target: 'http://backend:5000', pathRewrite: { '^/node/singletree': '/singletree' }, changeOrigin: true }));
 
 // launch app
 app.listen(PORT, () => {
-  console.log('Node.js proxy server is running on https://localhost:8000');
+  console.log('Node.js proxy server is running on http://localhost:8000');
 });
