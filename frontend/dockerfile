@@ -1,3 +1,4 @@
+  GNU nano 6.2                                                              dockerfile
 # Use the official Node.js runtime as the base image
 FROM node:18 as build
 
@@ -14,6 +15,7 @@ RUN npm install
 COPY . .
 
 # Build the React app for production
+ENV NODE_ENV production
 RUN npm run build
 
 # Use Nginx as the production server
