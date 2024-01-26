@@ -10,6 +10,9 @@ services:
     build: ./frontend
     ports:
       - "80:80"
+    environment:
+      - REACT_APP_BASE_API_URL_ENDPOINT=http://ipaddress:5000
+      - REACT_APP_API_KEY=pk.eyJ1IjoiaGFycnlvY2xlaXJpZ2giLCJhIjoiY2xrcDg5MHg5MDdtZDNocDZmb3pnNGVpeSJ9.uBsz5pBfWmNRRRphtyNE9w
     networks:
       - trees
   nodeproxy:
